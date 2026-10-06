@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#10110F"/>
+  <path d="M0 510.5H1200M0 390.5H1200M0 270.5H1200M0 150.5H1200M105.5 0V630M225.5 0V630M345.5 0V630M465.5 0V630M585.5 0V630M705.5 0V630M825.5 0V630M945.5 0V630M1065.5 0V630" stroke="#F2F0E9" stroke-opacity=".08"/>
+  <rect x="76" y="74" width="92" height="92" rx="20" fill="#E9A477"/>
+  <path d="M100 95h14v30.2c0 8.8 3.9 13 12.1 13 7.2 0 12-3.8 12-12.7V95h14v31.6c0 18.3-10.1 26.4-25.9 26.4-17.6 0-26.3-9.3-26.3-26.3V95Z" fill="#10110F"/>
+  <text x="76" y="254" fill="#F2F0E9" font-family="Arial, sans-serif" font-size="74" font-weight="700" letter-spacing="-3">Jedrick Miclat</text>
+  <text x="81" y="315" fill="#E9A477" font-family="Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="3">ASPIRING FULL-STACK DEVELOPER</text>
+  <text x="81" y="426" fill="#F2F0E9" font-family="Arial, sans-serif" font-size="42" letter-spacing="-1">Building ideas into purposeful</text>
+  <text x="81" y="478" fill="#F2F0E9" font-family="Arial, sans-serif" font-size="42" letter-spacing="-1">digital experiences.</text>
+  <text x="81" y="565" fill="#A9A69E" font-family="Arial, sans-serif" font-size="18" letter-spacing="2">DCT • BSIT • 2029</text>
+  <circle cx="1070" cy="137" r="13" fill="#E9A477"/>
+  <text x="941" y="188" fill="#A9A69E" font-family="Arial, sans-serif" font-size="17" letter-spacing="2">JEDRICK.</text>
+</svg>
