@@ -1,17 +1,19 @@
 export const navigationItems = [
-  { label: 'Home', href: '#home' },
-  { label: 'About', href: '#about' },
-  { label: 'Skills', href: '#skills' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Achievements', href: '#achievements' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'Home', href: '#/home' },
+  { label: 'About', href: '#/about' },
+  { label: 'Projects', href: '#/projects' },
+  { label: 'Skills', href: '#/skills' },
+  { label: 'Equipment', href: '#/equipment' },
+  { label: 'Achievements', href: '#/achievements' },
+  { label: 'Journey', href: '#/journey' },
+  { label: 'Contact', href: '#/contact' },
 ]
 
 export const skillGroups = [
   {
     label: 'Frontend',
-    note: 'Building interfaces that are clear, responsive, and useful.',
-    skills: ['HTML', 'CSS', 'JavaScript', 'React'],
+    note: 'Building clear, responsive web interfaces.',
+    skills: ['HTML5', 'CSS3', 'JavaScript', 'React'],
   },
   {
     label: 'Programming',
@@ -19,31 +21,28 @@ export const skillGroups = [
     skills: ['Python', 'VB.NET'],
   },
   {
-    label: 'Development',
-    note: 'Learning the habits behind thoughtful, collaborative delivery.',
-    skills: ['Git', 'GitHub', 'Vercel'],
+    label: 'Backend / Database',
+    note: 'Exploring backend services and data.',
+    skills: ['Supabase'],
   },
   {
-    label: 'Backend & Content',
-    note: 'Exploring data, deployment, and practical content workflows.',
-    skills: ['Supabase', 'WordPress'],
+    label: 'Version control',
+    note: 'Keeping project changes organized and shareable.',
+    skills: ['Git', 'GitHub'],
+  },
+  {
+    label: 'Deployment',
+    note: 'Learning how to publish web projects.',
+    skills: ['Vercel'],
+  },
+  {
+    label: 'CMS',
+    note: 'Exploring content management workflows.',
+    skills: ['WordPress'],
   },
 ]
 
 export const projects = [
-  {
-    title: 'Meme Calculator',
-    category: 'Web experiment',
-    status: 'Live demo available',
-    description:
-      'A playful calculator-style web experiment where the calculate action leads to a full-screen video result.',
-    role: 'Individual developer',
-    technologies: ['HTML', 'CSS', 'JavaScript'],
-    githubUrl: 'https://github.com/jedrick-relshey/meme-calculator',
-    liveUrl: 'https://meme-calculator-psi.vercel.app/',
-    image: null,
-    imageAlt: '',
-  },
   {
     title: 'Restaurant Website Project',
     category: 'Web development',
@@ -54,8 +53,8 @@ export const projects = [
     technologies: ['PHP', 'HTML', 'CSS', 'JavaScript', 'MySQL'],
     githubUrl: 'https://github.com/jedrick-relshey/Restaurant-website-project',
     liveUrl: null,
-    image: null,
-    imageAlt: '',
+    image: '/IMAGES/restaurant%20website.jpg',
+    imageAlt: 'Restaurant website project screenshot',
   },
   {
     title: 'BrewPoint Café POS',
@@ -67,8 +66,8 @@ export const projects = [
     technologies: ['VB.NET', 'Windows Forms'],
     githubUrl: 'https://github.com/jedrick-relshey/point-of-sale-system',
     liveUrl: null,
-    image: null,
-    imageAlt: '',
+    image: '/IMAGES/pos.jpg',
+    imageAlt: 'BrewPoint cafe point-of-sale project screenshot',
   },
   {
     title: 'LRT1 MetroRailway System',
@@ -80,8 +79,8 @@ export const projects = [
     technologies: ['Python', 'Linked lists'],
     githubUrl: 'https://github.com/jedrick-relshey/METRO-RAILWAY-SYSTEM',
     liveUrl: null,
-    image: null,
-    imageAlt: '',
+    image: '/IMAGES/ltr.jpg',
+    imageAlt: 'LRT railway train screenshot for the MetroRailway project',
   },
   {
     title: 'Student Grading System',
@@ -93,8 +92,8 @@ export const projects = [
     technologies: ['VB.NET', 'Windows Forms'],
     githubUrl: 'https://github.com/jedrick-relshey/Student-Grading-System',
     liveUrl: null,
-    image: null,
-    imageAlt: '',
+    image: '/IMAGES/grading%20system.jpg',
+    imageAlt: 'Student grading system project screenshot',
   },
   {
     title: 'Student Record Management System',
@@ -106,8 +105,8 @@ export const projects = [
     technologies: ['Python'],
     githubUrl: 'https://github.com/jedrick-relshey/Student-Management-System',
     liveUrl: null,
-    image: null,
-    imageAlt: '',
+    image: '/IMAGES/student%20record%20system.png',
+    imageAlt: 'Student record management project screenshot',
   },
   {
     title: 'Pickleball Website',
@@ -119,8 +118,8 @@ export const projects = [
     technologies: ['To be confirmed'],
     githubUrl: null,
     liveUrl: null,
-    image: null,
-    imageAlt: '',
+    image: '/IMAGES/pickleball.jpg',
+    imageAlt: 'Pickleball website reference image',
   },
 ]
 
