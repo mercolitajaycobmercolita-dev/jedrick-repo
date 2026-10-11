@@ -640,9 +640,27 @@ h1 span { display: inline; color: var(--accent); }
 .admin-saved-list { max-width: 900px; margin-top: 2.5rem; }
 .admin-saved-list h2 { font-size: 1.35rem; }
 .admin-saved-list > p { color: var(--muted); }
-.admin-saved-item { display: grid; grid-template-columns: 110px 1fr auto; align-items: center; gap: 1rem; padding: 0.8rem 0; border-top: 1px solid var(--line); }
+.admin-saved-item { display: grid; grid-template-columns: 110px minmax(0, 1fr) auto auto; align-items: center; gap: 1rem; padding: 0.8rem 0; border-top: 1px solid var(--line); }
 .admin-saved-item > span { color: var(--muted); font-family: var(--mono); font-size: 0.62rem; text-transform: uppercase; }
 .admin-saved-item .text-link { padding: 0; border: 0; color: var(--accent); background: none; }
+.admin-saved-item button:disabled { opacity: 0.5; }
+.admin-form > h2 { grid-column: 1 / -1; margin: 0; font-size: 1.3rem; }
+.admin-form label.admin-checkbox { display: flex; align-items: center; gap: 0.6rem; }
+.admin-form .admin-checkbox input { width: 18px; min-height: 18px; accent-color: var(--accent); }
+.admin-form label.admin-checkbox > span { color: var(--muted-strong); font-family: inherit; font-size: 0.8rem; letter-spacing: 0; text-transform: none; }
+.admin-form-actions { display: flex; flex-wrap: wrap; gap: 0.8rem; grid-column: 1 / -1; }
+.admin-form .button:disabled { cursor: wait; opacity: 0.6; }
+.admin-dashboard-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; }
+.admin-logout { padding: 0.7rem 0; border: 0; color: var(--accent); background: none; }
+.admin-auth-shell { display: grid; min-height: 100vh; place-items: center; padding: 2rem 1rem; background: radial-gradient(ellipse at 15% 10%, rgba(190, 246, 89, 0.09), transparent 42%), var(--ink); }
+.admin-auth-card { display: grid; gap: 1rem; width: min(480px, 100%); padding: clamp(1.4rem, 5vw, 2.6rem); border: 1px solid var(--line-strong); background: var(--ink-raised); }
+.admin-auth-card > .brand { margin-bottom: 1rem; }
+.admin-auth-card h1 { margin: 0; font-size: clamp(2.3rem, 7vw, 3.5rem); line-height: 1; }
+.admin-auth-card > p { color: var(--muted-strong); line-height: 1.6; }
+.admin-auth-form { grid-template-columns: 1fr; padding: 0; border: 0; background: transparent; }
+.admin-auth-form .button { justify-self: start; }
+.admin-auth-error { color: #ff9f91; line-height: 1.5; }
+.admin-auth-card code { overflow-wrap: anywhere; }
 
 .contact-layout { display: grid; grid-template-columns: minmax(290px, 1fr) minmax(300px, 0.72fr); gap: clamp(3rem, 10vw, 10.5rem); align-items: end; }
 .contact-copy h1, .contact-copy h2 { max-width: 10ch; margin: 0.9rem 0 1rem; font-size: clamp(3rem, 5.2vw, 5.5rem); font-weight: 800; line-height: 0.94; }

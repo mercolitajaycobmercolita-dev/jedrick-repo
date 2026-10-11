@@ -1,48 +1,142 @@
 import { useEffect, useState } from 'react'
+import {
+  deleteContent,
+  deletePortfolioImage,
+  isSupabaseConfigured,
+  listAdminContent,
+  listPublicContent,
+  publicImageUrl,
+  saveContent,
+  uploadPortfolioImage,
+} from '../lib/supabase.js'
 
-export const ADMIN_PROJECTS_KEY = 'jedrick-portfolio:projects'
-export const ADMIN_CERTIFICATES_KEY = 'jedrick-portfolio:certificates'
+export const ADMIN_PROJECTS_KEY = 'projects'
+export const ADMIN_CERTIFICATES_KEY = 'certificates'
 
-export function readStoredList(key) {
-  if (typeof window === 'undefined') return []
-  try {
-    const value = JSON.parse(window.localStorage.getItem(key) || '[]')
-    return Array.isArray(value) ? value : []
-  } catch {
-    return []
+function safeExternalUrl(value) {
+  if (!value) return null
+  const parsed = new URL(value)
+  if (!['https:', 'http:'].includes(parsed.protocol)) throw new Error('Links must start with http:// or https://.')
+  return parsed.href
+}
+
+function mapProject(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    category: row.category,
+    status: row.status,
+    description: row.description,
+    role: row.role,
+    technologies: row.technologies || [],
+    githubUrl: row.github_url,
+    liveUrl: row.live_url,
+    image: publicImageUrl(row.image_path),
+    imagePath: row.image_path,
+    imageAlt: row.image_alt || `${row.title} preview`,
+    isPublished: row.is_published,
+    displayOrder: row.display_order,
   }
 }
 
-export function writeStoredList(key, value) {
-  window.localStorage.setItem(key, JSON.stringify(value))
-  window.dispatchEvent(new CustomEvent('portfolio-storage-change', { detail: { key } }))
+function mapCertificate(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    issuer: row.issuer,
+    earnedAt: row.earned_at,
+    verificationUrl: row.verification_url,
+    image: publicImageUrl(row.image_path),
+    imagePath: row.image_path,
+    isPublished: row.is_published,
+    displayOrder: row.display_order,
+  }
 }
 
-export function useStoredList(key) {
-  const [items, setItems] = useState(() => readStoredList(key))
+export async function fetchProjects({ admin = false } = {}) {
+  const rows = admin ? await listAdminContent(ADMIN_PROJECTS_KEY) : await listPublicContent(ADMIN_PROJECTS_KEY)
+  return rows.map(mapProject)
+}
+
+export async function fetchCertificates({ admin = false } = {}) {
+  const rows = admin ? await listAdminContent(ADMIN_CERTIFICATES_KEY) : await listPublicContent(ADMIN_CERTIFICATES_KEY)
+  return rows.map(mapCertificate)
+}
+
+export async function storeProject(values, file, existingPath = null) {
+  const imagePath = file ? await uploadPortfolioImage(file, 'projects') : existingPath
+  const row = {
+    ...(values.id ? { id: values.id } : {}),
+    title: values.title,
+    category: values.category || 'Personal project',
+    status: values.status || 'Published',
+    description: values.description,
+    role: values.role || 'Developer',
+    technologies: values.technologies,
+    github_url: safeExternalUrl(values.githubUrl),
+    live_url: safeExternalUrl(values.liveUrl),
+    image_path: imagePath,
+    image_alt: values.imageAlt || `${values.title} project image`,
+    display_order: Number(values.displayOrder) || 0,
+    is_published: Boolean(values.isPublished),
+  }
+  const saved = await saveContent(ADMIN_PROJECTS_KEY, row)
+  if (file && existingPath && existingPath !== imagePath) {
+    await deletePortfolioImage(existingPath).catch(() => {})
+  }
+  return mapProject(saved)
+}
+
+export async function storeCertificate(values, file, existingPath = null) {
+  const imagePath = file ? await uploadPortfolioImage(file, 'certificates') : existingPath
+  if (!imagePath) throw new Error('Choose a certificate image.')
+  const row = {
+    ...(values.id ? { id: values.id } : {}),
+    title: values.title,
+    description: values.description,
+    issuer: values.issuer || null,
+    earned_at: values.earnedAt || null,
+    verification_url: safeExternalUrl(values.verificationUrl),
+    image_path: imagePath,
+    display_order: Number(values.displayOrder) || 0,
+    is_published: Boolean(values.isPublished),
+  }
+  const saved = await saveContent(ADMIN_CERTIFICATES_KEY, row)
+  if (file && existingPath && existingPath !== imagePath) {
+    await deletePortfolioImage(existingPath).catch(() => {})
+  }
+  return mapCertificate(saved)
+}
+
+export async function removeContent(table, item) {
+  await deleteContent(table, item.id)
+  if (item.imagePath) await deletePortfolioImage(item.imagePath).catch(() => {})
+}
+
+export function usePortfolioContent(table, fallback = []) {
+  const [items, setItems] = useState(fallback)
+  const [loading, setLoading] = useState(isSupabaseConfigured)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    function refresh(event) {
-      if (event.type === 'storage' && event.key && event.key !== key) return
-      if (event.type === 'portfolio-storage-change' && event.detail?.key !== key) return
-      setItems(readStoredList(key))
+    let active = true
+    if (!isSupabaseConfigured) {
+      setItems(fallback)
+      setLoading(false)
+      return undefined
     }
-    window.addEventListener('storage', refresh)
-    window.addEventListener('portfolio-storage-change', refresh)
-    return () => {
-      window.removeEventListener('storage', refresh)
-      window.removeEventListener('portfolio-storage-change', refresh)
-    }
-  }, [key])
+    setLoading(true)
+    const load = table === ADMIN_PROJECTS_KEY ? fetchProjects : fetchCertificates
+    load().then((records) => {
+      if (active) setItems(records)
+    }).catch((loadError) => {
+      if (active) setError(loadError.message)
+    }).finally(() => {
+      if (active) setLoading(false)
+    })
+    return () => { active = false }
+  }, [table])
 
-  return items
-}
-
-export function imageFileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result))
-    reader.onerror = () => reject(new Error('Could not read the selected image.'))
-    reader.readAsDataURL(file)
-  })
+  return { items, loading, error }
 }

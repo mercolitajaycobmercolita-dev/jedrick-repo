@@ -11,10 +11,20 @@ import {
 import {
   ADMIN_CERTIFICATES_KEY,
   ADMIN_PROJECTS_KEY,
-  imageFileToDataUrl,
-  useStoredList,
-  writeStoredList,
+  fetchCertificates,
+  fetchProjects,
+  removeContent,
+  storeCertificate,
+  storeProject,
+  usePortfolioContent,
 } from './data/adminStore.js'
+import {
+  getCurrentUser,
+  isPortfolioAdmin,
+  isSupabaseConfigured,
+  signInWithPassword,
+  signOut,
+} from './lib/supabase.js'
 
 const externalLinkProps = {
   target: '_blank',
@@ -320,8 +330,7 @@ function ProjectCard({ project, index }) {
 }
 
 function Projects() {
-  const addedProjects = useStoredList(ADMIN_PROJECTS_KEY)
-  const allProjects = [...projects, ...addedProjects]
+  const { items: allProjects, loading, error } = usePortfolioContent(ADMIN_PROJECTS_KEY, projects)
   return (
     <section className="section section--projects" id="projects" aria-labelledby="projects-title" data-reveal>
       <div className="page-grid">
@@ -339,6 +348,8 @@ function Projects() {
           </a>
         </div>
         <div className="project-list">
+          {loading && <p role="status">Loading published projects…</p>}
+          {error && <p role="alert">Projects could not be loaded: {error}</p>}
           {allProjects.map((project, index) => <ProjectCard project={project} index={index} key={project.id || project.title} />)}
         </div>
         <div className="project-footnote">
@@ -354,7 +365,7 @@ function Projects() {
 }
 
 function Achievements() {
-  const certificates = useStoredList(ADMIN_CERTIFICATES_KEY)
+  const { items: certificates, loading, error } = usePortfolioContent(ADMIN_CERTIFICATES_KEY)
   const [activeCertificate, setActiveCertificate] = useState(null)
 
   useEffect(() => {
@@ -377,7 +388,7 @@ function Achievements() {
           titleId="achievements-title"
           level="h1"
         />
-        {certificates.length ? (
+        {loading ? <p role="status">Loading published certificates…</p> : error ? <p role="alert">Certificates could not be loaded: {error}</p> : certificates.length ? (
           <div className="certificate-grid">
             {certificates.map((certificate) => (
               <button className="certificate-card" key={certificate.id} onClick={() => setActiveCertificate(certificate)} type="button">
@@ -649,130 +660,266 @@ function Contact() {
   )
 }
 
-function Admin() {
-  const [activeTab, setActiveTab] = useState('projects')
-  const [notice, setNotice] = useState('')
-  const savedProjects = useStoredList(ADMIN_PROJECTS_KEY)
-  const savedCertificates = useStoredList(ADMIN_CERTIFICATES_KEY)
+function navigateAdmin(path, replace = false) {
+  window.history[replace ? 'replaceState' : 'pushState']({}, '', path)
+  window.dispatchEvent(new PopStateEvent('popstate'))
+}
 
-  async function addProject(event) {
+function AdminLogin() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return
+    getCurrentUser().then(async (user) => {
+      if (user && await isPortfolioAdmin()) navigateAdmin('/admin/dashboard', true)
+    }).catch(() => {})
+  }, [])
+
+  async function submit(event) {
     event.preventDefault()
-    const form = event.currentTarget
-    const fields = new FormData(form)
-    const imageFile = fields.get('image')
-    if (!(imageFile instanceof File) || !imageFile.size) {
-      setNotice('Pumili ng project image bago i-save.')
-      return
-    }
-    if (imageFile.size > 1_500_000) {
-      setNotice('Max 1.5 MB ang image file para kasya sa browser storage.')
-      return
-    }
+    setBusy(true)
+    setError('')
     try {
-      const image = await imageFileToDataUrl(imageFile)
-      const project = {
-        id: crypto.randomUUID(),
-        title: fields.get('title').trim(),
-        category: fields.get('category').trim() || 'Personal project',
-        status: 'Added from Admin',
-        description: fields.get('description').trim(),
-        role: fields.get('role').trim() || 'Developer',
-        technologies: fields.get('technologies').split(',').map((value) => value.trim()).filter(Boolean),
-        githubUrl: fields.get('githubUrl').trim() || null,
-        liveUrl: fields.get('liveUrl').trim() || null,
-        image,
-        imageAlt: `${fields.get('title').trim()} project image`,
+      await signInWithPassword(email, password)
+      if (!await isPortfolioAdmin()) {
+        await signOut()
+        throw new Error('This account is not authorized to manage this portfolio.')
       }
-      writeStoredList(ADMIN_PROJECTS_KEY, [...savedProjects, project])
-      form.reset()
-      setNotice('Nadagdag ang project. Makikita ito sa Projects page.')
-    } catch {
-      setNotice('Hindi na-save ang project. Baka puno na ang browser storage.')
+      navigateAdmin('/admin/dashboard', true)
+    } catch (loginError) {
+      setError(loginError.message)
+    } finally {
+      setBusy(false)
     }
-  }
-
-  async function addCertificate(event) {
-    event.preventDefault()
-    const form = event.currentTarget
-    const fields = new FormData(form)
-    const imageFile = fields.get('image')
-    if (!(imageFile instanceof File) || !imageFile.size) {
-      setNotice('Pumili ng certificate image bago i-save.')
-      return
-    }
-    if (imageFile.size > 1_500_000) {
-      setNotice('Max 1.5 MB ang image file para kasya sa browser storage.')
-      return
-    }
-    try {
-      const certificate = {
-        id: crypto.randomUUID(),
-        title: fields.get('title').trim(),
-        description: fields.get('description').trim(),
-        image: await imageFileToDataUrl(imageFile),
-      }
-      writeStoredList(ADMIN_CERTIFICATES_KEY, [...savedCertificates, certificate])
-      form.reset()
-      setNotice('Nadagdag ang certificate. Clickable na ito sa Achievements page.')
-    } catch {
-      setNotice('Hindi na-save ang certificate. Baka puno na ang browser storage.')
-    }
-  }
-
-  function removeItem(key, items, id) {
-    writeStoredList(key, items.filter((item) => item.id !== id))
-    setNotice('Inalis ang item.')
   }
 
   return (
-    <section className="section section--admin" aria-labelledby="admin-title">
+    <main className="admin-auth-shell">
+      <section className="admin-auth-card">
+        <a className="brand" href="/#/home">JEDRICK<span className="brand-dot">.</span></a>
+        <span className="eyebrow">Private area</span>
+        <h1>Admin sign in</h1>
+        <p>Sign in using the administrator account authorized for this portfolio.</p>
+        {!isSupabaseConfigured && <p className="admin-auth-error" role="alert">Add the Supabase project URL and anon key to <code>.env.local</code> before signing in.</p>}
+        <form className="admin-form admin-auth-form" onSubmit={submit}>
+          <label><span>Email</span><input autoComplete="username" name="email" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} /></label>
+          <label><span>Password</span><input autoComplete="current-password" name="password" onChange={(event) => setPassword(event.target.value)} required type="password" value={password} /></label>
+          {error && <p className="admin-auth-error" role="alert">{error}</p>}
+          <button className="button button--primary" disabled={busy || !isSupabaseConfigured} type="submit">{busy ? 'Signing in…' : 'Sign in'} <Icon name="arrowUpRight" size={17} /></button>
+        </form>
+        <a className="text-link" href="/#/home">Return to portfolio</a>
+      </section>
+    </main>
+  )
+}
+
+function AdminGate() {
+  const [access, setAccess] = useState({ status: 'checking', user: null, error: '' })
+
+  useEffect(() => {
+    let active = true
+    async function verify() {
+      try {
+        if (!isSupabaseConfigured) throw new Error('Supabase is not configured. Set up .env.local first.')
+        const user = await getCurrentUser()
+        if (!user) {
+          navigateAdmin('/admin/login', true)
+          return
+        }
+        if (!await isPortfolioAdmin()) {
+          await signOut()
+          setAccess({ status: 'denied', user: null, error: 'This account is not authorized for the admin dashboard.' })
+          return
+        }
+        if (active) setAccess({ status: 'allowed', user, error: '' })
+      } catch (error) {
+        if (active) setAccess({ status: 'error', user: null, error: error.message })
+      }
+    }
+    verify()
+    return () => { active = false }
+  }, [])
+
+  if (access.status === 'checking') return <main className="admin-auth-shell"><p role="status">Checking administrator access…</p></main>
+  if (access.status !== 'allowed') {
+    return <main className="admin-auth-shell"><section className="admin-auth-card"><span className="eyebrow">Access denied</span><h1>Admin access unavailable</h1><p className="admin-auth-error" role="alert">{access.error}</p><a className="text-link" href="/admin/login">Return to sign in</a></section></main>
+  }
+  return <AdminDashboard user={access.user} />
+}
+
+function AdminDashboard({ user }) {
+  const [activeTab, setActiveTab] = useState('projects')
+  const [projectsList, setProjectsList] = useState([])
+  const [certificatesList, setCertificatesList] = useState([])
+  const [editingProject, setEditingProject] = useState(null)
+  const [editingCertificate, setEditingCertificate] = useState(null)
+  const [notice, setNotice] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  async function refresh() {
+    const [nextProjects, nextCertificates] = await Promise.all([fetchProjects({ admin: true }), fetchCertificates({ admin: true })])
+    setProjectsList(nextProjects)
+    setCertificatesList(nextCertificates)
+  }
+
+  useEffect(() => {
+    refresh().catch((loadError) => setError(loadError.message))
+  }, [])
+
+  async function submitProject(event) {
+    event.preventDefault()
+    const form = event.currentTarget
+    const fields = new FormData(form)
+    const file = fields.get('image')
+    if (file?.size > 5 * 1024 * 1024) return setError('Image must be 5 MB or smaller.')
+    setBusy(true)
+    setError('')
+    setNotice('')
+    try {
+      await storeProject({
+        id: editingProject?.id,
+        title: String(fields.get('title')).trim(),
+        description: String(fields.get('description')).trim(),
+        category: String(fields.get('category')).trim(),
+        role: String(fields.get('role')).trim(),
+        technologies: String(fields.get('technologies')).split(',').map((item) => item.trim()).filter(Boolean),
+        githubUrl: String(fields.get('githubUrl')).trim(),
+        liveUrl: String(fields.get('liveUrl')).trim(),
+        status: String(fields.get('status')).trim(),
+        displayOrder: fields.get('displayOrder'),
+        isPublished: fields.get('isPublished') === 'on',
+      }, file?.size ? file : null, editingProject?.imagePath)
+      await refresh()
+      form.reset()
+      setEditingProject(null)
+      setNotice('Project saved to Supabase.')
+    } catch (saveError) {
+      setError(saveError.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function submitCertificate(event) {
+    event.preventDefault()
+    const form = event.currentTarget
+    const fields = new FormData(form)
+    const file = fields.get('image')
+    if (!editingCertificate && !file?.size) return setError('Choose a certificate image.')
+    if (file?.size > 5 * 1024 * 1024) return setError('Image must be 5 MB or smaller.')
+    setBusy(true)
+    setError('')
+    setNotice('')
+    try {
+      await storeCertificate({
+        id: editingCertificate?.id,
+        title: String(fields.get('title')).trim(),
+        description: String(fields.get('description')).trim(),
+        issuer: String(fields.get('issuer')).trim(),
+        earnedAt: String(fields.get('earnedAt')).trim(),
+        verificationUrl: String(fields.get('verificationUrl')).trim(),
+        displayOrder: fields.get('displayOrder'),
+        isPublished: fields.get('isPublished') === 'on',
+      }, file?.size ? file : null, editingCertificate?.imagePath)
+      await refresh()
+      form.reset()
+      setEditingCertificate(null)
+      setNotice('Certificate saved to Supabase.')
+    } catch (saveError) {
+      setError(saveError.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function removeItem(table, item) {
+    if (!window.confirm(`Delete “${item.title}” permanently?`)) return
+    setBusy(true)
+    setError('')
+    setNotice('')
+    try {
+      await removeContent(table, item)
+      await refresh()
+      if (editingProject?.id === item.id) setEditingProject(null)
+      if (editingCertificate?.id === item.id) setEditingCertificate(null)
+      setNotice('Item deleted.')
+    } catch (removeError) {
+      setError(removeError.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function logout() {
+    await signOut()
+    navigateAdmin('/admin/login', true)
+  }
+
+  return (
+    <main className="section section--admin">
       <div className="page-grid">
-        <div className="admin-heading">
-          <div className="eyebrow-row"><span className="section-number">A</span><span className="eyebrow">Portfolio content</span></div>
-          <h1 id="admin-title">Admin panel</h1>
-          <p>Magdagdag ng project o certificate para lumabas sa portfolio.</p>
-        </div>
-        <div className="admin-notice" role="status">
-          <strong>Local preview admin</strong>
-          <span>Naka-save ang entries sa browser na ito lang. Hindi pa ito secure na login o shared live database.</span>
+        <div className="admin-dashboard-top">
+          <div className="admin-heading">
+            <div className="eyebrow-row"><span className="section-number">A</span><span className="eyebrow">Private portfolio CMS</span></div>
+            <h1>Admin panel</h1>
+            <p>Signed in as {user.email}. Changes save to Supabase and appear publicly when published.</p>
+          </div>
+          <button className="text-link admin-logout" onClick={logout} type="button">Sign out</button>
         </div>
         <div className="admin-tabs" role="tablist" aria-label="Content type">
-          <button aria-selected={activeTab === 'projects'} onClick={() => setActiveTab('projects')} role="tab" type="button">Projects</button>
-          <button aria-selected={activeTab === 'certificates'} onClick={() => setActiveTab('certificates')} role="tab" type="button">Achievements / Certificates</button>
+          <button aria-selected={activeTab === 'projects'} onClick={() => setActiveTab('projects')} role="tab" type="button">Projects ({projectsList.length})</button>
+          <button aria-selected={activeTab === 'certificates'} onClick={() => setActiveTab('certificates')} role="tab" type="button">Certificates ({certificatesList.length})</button>
         </div>
         {activeTab === 'projects' ? (
-          <form className="admin-form" onSubmit={addProject}>
-            <label><span>Project title</span><input name="title" required /></label>
-            <label><span>Description</span><textarea name="description" required rows="4" /></label>
-            <label><span>Category</span><input name="category" placeholder="Web development" /></label>
-            <label><span>Role</span><input name="role" placeholder="Individual developer" /></label>
-            <label><span>Technologies (comma separated)</span><input name="technologies" placeholder="React, CSS, JavaScript" /></label>
-            <label><span>Repository link</span><input name="githubUrl" type="url" placeholder="https://github.com/..." /></label>
-            <label><span>Live link</span><input name="liveUrl" type="url" placeholder="https://..." /></label>
-            <label><span>Project image</span><input accept="image/*" name="image" required type="file" /></label>
-            <button className="button button--primary" type="submit">Add project <Icon name="arrowUpRight" size={17} /></button>
-          </form>
-        ) : (
-          <form className="admin-form" onSubmit={addCertificate}>
-            <label><span>Certificate / achievement title</span><input name="title" required /></label>
-            <label><span>Description</span><textarea name="description" required rows="4" /></label>
-            <label><span>Certificate image</span><input accept="image/*" name="image" required type="file" /></label>
-            <button className="button button--primary" type="submit">Add certificate <Icon name="arrowUpRight" size={17} /></button>
-          </form>
-        )}
-        {notice && <p className="admin-feedback" role="status">{notice}</p>}
-        <div className="admin-saved-list">
-          <h2>Added items</h2>
-          {[...savedProjects.map((item) => ({ ...item, kind: 'Project', key: ADMIN_PROJECTS_KEY, list: savedProjects })), ...savedCertificates.map((item) => ({ ...item, kind: 'Certificate', key: ADMIN_CERTIFICATES_KEY, list: savedCertificates }))].map((item) => (
-            <div className="admin-saved-item" key={item.id}>
-              <span>{item.kind}</span><strong>{item.title}</strong>
-              <button className="text-link" onClick={() => removeItem(item.key, item.list, item.id)} type="button">Remove</button>
+          <>
+            <form className="admin-form" key={editingProject?.id || 'new-project'} onSubmit={submitProject}>
+              <h2>{editingProject ? 'Edit project' : 'Add project'}</h2>
+              <label><span>Project title</span><input defaultValue={editingProject?.title || ''} name="title" required /></label>
+              <label><span>Category</span><input defaultValue={editingProject?.category || ''} name="category" placeholder="Web development" /></label>
+              <label><span>Role</span><input defaultValue={editingProject?.role || ''} name="role" placeholder="Individual developer" /></label>
+              <label><span>Status</span><input defaultValue={editingProject?.status || 'Published'} name="status" /></label>
+              <label><span>Description</span><textarea defaultValue={editingProject?.description || ''} name="description" required rows="4" /></label>
+              <label><span>Technologies (comma separated)</span><input defaultValue={editingProject?.technologies.join(', ') || ''} name="technologies" placeholder="React, CSS, JavaScript" /></label>
+              <label><span>Repository link</span><input defaultValue={editingProject?.githubUrl || ''} name="githubUrl" type="url" placeholder="https://github.com/..." /></label>
+              <label><span>Live link</span><input defaultValue={editingProject?.liveUrl || ''} name="liveUrl" type="url" placeholder="https://..." /></label>
+              <label><span>Image {editingProject ? '(leave blank to keep current)' : ''}</span><input accept="image/jpeg,image/png,image/webp" name="image" required={!editingProject} type="file" /></label>
+              <label><span>Display order</span><input defaultValue={editingProject?.displayOrder ?? projectsList.length + 1} min="0" name="displayOrder" type="number" /></label>
+              <label className="admin-checkbox"><input defaultChecked={editingProject?.isPublished ?? true} name="isPublished" type="checkbox" /><span>Published on public portfolio</span></label>
+              <div className="admin-form-actions"><button className="button button--primary" disabled={busy} type="submit">{busy ? 'Saving…' : editingProject ? 'Save project' : 'Add project'}</button>{editingProject && <button className="button button--ghost" onClick={() => setEditingProject(null)} type="button">Cancel edit</button>}</div>
+            </form>
+            <div className="admin-saved-list"><h2>Projects</h2>
+              {projectsList.map((item) => <div className="admin-saved-item" key={item.id}><span>{item.isPublished ? 'Published' : 'Draft'}</span><strong>{item.title}</strong><button className="text-link" onClick={() => { setEditingProject(item); setError(''); window.scrollTo(0, 0) }} type="button">Edit</button><button className="text-link" disabled={busy} onClick={() => removeItem(ADMIN_PROJECTS_KEY, item)} type="button">Delete</button></div>)}
+              {!projectsList.length && <p>No projects in Supabase yet. Run the SQL seed section first.</p>}
             </div>
-          ))}
-          {!savedProjects.length && !savedCertificates.length && <p>No additional items yet.</p>}
-        </div>
+          </>
+        ) : (
+          <>
+            <form className="admin-form" key={editingCertificate?.id || 'new-certificate'} onSubmit={submitCertificate}>
+              <h2>{editingCertificate ? 'Edit certificate' : 'Add certificate'}</h2>
+              <label><span>Certificate / achievement title</span><input defaultValue={editingCertificate?.title || ''} name="title" required /></label>
+              <label><span>Issuing organization</span><input defaultValue={editingCertificate?.issuer || ''} name="issuer" /></label>
+              <label><span>Date earned</span><input defaultValue={editingCertificate?.earnedAt || ''} name="earnedAt" type="date" /></label>
+              <label><span>Verification link</span><input defaultValue={editingCertificate?.verificationUrl || ''} name="verificationUrl" type="url" placeholder="https://..." /></label>
+              <label><span>Description</span><textarea defaultValue={editingCertificate?.description || ''} name="description" required rows="4" /></label>
+              <label><span>Certificate image {editingCertificate ? '(leave blank to keep current)' : ''}</span><input accept="image/jpeg,image/png,image/webp" name="image" required={!editingCertificate} type="file" /></label>
+              <label><span>Display order</span><input defaultValue={editingCertificate?.displayOrder ?? certificatesList.length + 1} min="0" name="displayOrder" type="number" /></label>
+              <label className="admin-checkbox"><input defaultChecked={editingCertificate?.isPublished ?? true} name="isPublished" type="checkbox" /><span>Published on public portfolio</span></label>
+              <div className="admin-form-actions"><button className="button button--primary" disabled={busy} type="submit">{busy ? 'Saving…' : editingCertificate ? 'Save certificate' : 'Add certificate'}</button>{editingCertificate && <button className="button button--ghost" onClick={() => setEditingCertificate(null)} type="button">Cancel edit</button>}</div>
+            </form>
+            <div className="admin-saved-list"><h2>Certificates</h2>
+              {certificatesList.map((item) => <div className="admin-saved-item" key={item.id}><span>{item.isPublished ? 'Published' : 'Draft'}</span><strong>{item.title}</strong><button className="text-link" onClick={() => { setEditingCertificate(item); setError(''); window.scrollTo(0, 0) }} type="button">Edit</button><button className="text-link" disabled={busy} onClick={() => removeItem(ADMIN_CERTIFICATES_KEY, item)} type="button">Delete</button></div>)}
+              {!certificatesList.length && <p>No certificates yet.</p>}
+            </div>
+          </>
+        )}
+        {error && <p className="admin-auth-error" role="alert">{error}</p>}
+        {notice && <p className="admin-feedback" role="status">{notice}</p>}
       </div>
-    </section>
+    </main>
   )
 }
 
@@ -787,7 +934,6 @@ function Footer() {
         <div className="footer-links">
           <a href={socialLinks.github.href} {...externalLinkProps}>GitHub</a>
           <a href={socialLinks.email.href}>Email</a>
-          <a href="#/admin" target="_blank" rel="noreferrer">Admin</a>
           <a href="#/home">Home <Icon name="arrowUpRight" size={14} /></a>
         </div>
       </div>
@@ -804,7 +950,6 @@ const pageComponents = {
   achievements: Achievements,
   journey: Journey,
   contact: Contact,
-  admin: Admin,
 }
 
 function getPageFromHash() {
@@ -814,22 +959,34 @@ function getPageFromHash() {
 
 export default function App() {
   const [activePage, setActivePage] = useState(getPageFromHash)
+  const [pathname, setPathname] = useState(window.location.pathname)
+  const routePath = pathname.replace(/\/+$/, '') || '/'
 
   useEffect(() => {
     function syncPage() {
       setActivePage(getPageFromHash())
+      setPathname(window.location.pathname)
     }
     window.addEventListener('hashchange', syncPage)
-    return () => window.removeEventListener('hashchange', syncPage)
+    window.addEventListener('popstate', syncPage)
+    return () => {
+      window.removeEventListener('hashchange', syncPage)
+      window.removeEventListener('popstate', syncPage)
+    }
   }, [])
 
   useEffect(() => {
+    if (routePath.startsWith('/admin')) {
+      document.title = routePath === '/admin/dashboard' ? 'Admin Dashboard | Jedrick Miclat' : 'Admin Sign In | Jedrick Miclat'
+      return
+    }
     window.scrollTo(0, 0)
-    const pageLabel = navigationItems.find((item) => item.href === `#/${activePage}`)?.label ?? (activePage === 'admin' ? 'Admin' : 'Home')
+    const pageLabel = navigationItems.find((item) => item.href === `#/${activePage}`)?.label ?? 'Home'
     document.title = `${pageLabel} | Jedrick Miclat`
-  }, [activePage])
+  }, [activePage, routePath])
 
   useEffect(() => {
+    if (routePath.startsWith('/admin')) return undefined
     const revealTargets = Array.from(document.querySelectorAll('[data-reveal]'))
     const observer = new IntersectionObserver(
       (entries) => {
@@ -845,7 +1002,11 @@ export default function App() {
 
     revealTargets.forEach((target) => observer.observe(target))
     return () => observer.disconnect()
-  }, [activePage])
+  }, [activePage, routePath])
+
+  if (routePath.startsWith('/admin')) {
+    return routePath === '/admin/dashboard' ? <AdminGate /> : <AdminLogin />
+  }
 
   const Page = pageComponents[activePage] ?? Hero
 
