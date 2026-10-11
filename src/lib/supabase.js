@@ -5,6 +5,25 @@ const bucket = 'portfolio-media'
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey)
 
+export function consumeAuthRedirect() {
+  const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+  const accessToken = params.get('access_token')
+  if (!accessToken) return null
+
+  const expiresIn = Number(params.get('expires_in') || 0)
+  const expiresAt = Number(params.get('expires_at') || 0) || (Date.now() / 1000 + expiresIn)
+  saveSession({
+    access_token: accessToken,
+    refresh_token: params.get('refresh_token'),
+    token_type: params.get('token_type') || 'bearer',
+    expires_in: expiresIn,
+    expires_at: expiresAt,
+  })
+
+  window.history.replaceState({}, document.title, `${window.location.pathname}${window.location.search}`)
+  return params.get('type') || 'invite'
+}
+
 function requireConfig() {
   if (!isSupabaseConfigured) {
     throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local.')
@@ -42,6 +61,16 @@ export async function signInWithPassword(email, password) {
   })
   saveSession(session)
   return session
+}
+
+export async function updateCurrentUserPassword(password) {
+  const session = await getSession()
+  if (!session?.access_token) throw new Error('This invitation link is invalid or has expired. Request a new invite.')
+  return authRequest('/user', {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    body: JSON.stringify({ password }),
+  })
 }
 
 export async function signOut() {

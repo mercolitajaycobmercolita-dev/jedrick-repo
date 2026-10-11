@@ -22,8 +22,10 @@ import {
   getCurrentUser,
   isPortfolioAdmin,
   isSupabaseConfigured,
+  consumeAuthRedirect,
   signInWithPassword,
   signOut,
+  updateCurrentUserPassword,
 } from './lib/supabase.js'
 
 const externalLinkProps = {
@@ -173,8 +175,6 @@ function Hero() {
           <img className="identity-photo" src="/IMAGES/profile.jpg" alt="Jedrick Miclat" onLoad={(event) => event.currentTarget.parentElement.classList.add('has-photo')} onError={(event) => event.currentTarget.remove()} />
           <div className="identity-grid" aria-hidden="true" />
           <div className="monogram" aria-label="Jedrick Miclat initials">JM</div>
-          <div className="identity-corner identity-corner--top" aria-hidden="true" />
-          <div className="identity-corner identity-corner--bottom" aria-hidden="true" />
           <div className="identity-bottomline">
             <div>
               <span className="eyebrow">01</span>
@@ -352,13 +352,6 @@ function Projects() {
           {error && <p role="alert">Projects could not be loaded: {error}</p>}
           {allProjects.map((project, index) => <ProjectCard project={project} index={index} key={project.id || project.title} />)}
         </div>
-        <div className="project-footnote">
-          <Icon name="code" size={19} />
-          <p>
-            This work index grows as projects are documented. Each entry will link to its own
-            source code or live experience when it is ready to share.
-          </p>
-        </div>
       </div>
     </section>
   )
@@ -472,7 +465,9 @@ function Equipment() {
           {equipmentItems.map((item, index) => (
             <article className="equipment-card" key={item.title}>
               <span className="equipment-card__index">0{index + 1}</span>
-              <img className="equipment-card__image" src={item.image} alt={item.title} loading="lazy" />
+              <button className="equipment-card__image-button" onClick={() => setActiveItem(item)} type="button" aria-label={`View ${item.title} image and details`}>
+                <img className="equipment-card__image" src={item.image} alt={item.title} loading="lazy" />
+              </button>
               <span className="eyebrow">{item.category}</span>
               <h2>{item.title}</h2>
               <p>{item.summary}</p>
@@ -494,6 +489,7 @@ function Equipment() {
             </div>
             <span className="eyebrow">{activeItem.category}</span>
             <h2 id="equipment-dialog-title">{activeItem.title}</h2>
+            <img className="equipment-dialog__image" src={activeItem.image} alt={activeItem.title} />
             <p>{activeItem.summary} {activeItem.note}</p>
             <span className="eyebrow">Purpose</span>
             <strong>{activeItem.purpose}</strong>
@@ -560,6 +556,7 @@ function Journey() {
 
 function Contact() {
   const [copied, setCopied] = useState(false)
+  const [sendState, setSendState] = useState('idle')
 
   async function copyEmail() {
     try {
@@ -571,15 +568,35 @@ function Contact() {
     }
   }
 
-  function prepareEmail(event) {
+  async function prepareEmail(event) {
     event.preventDefault()
-    const fields = new FormData(event.currentTarget)
-    const name = fields.get('name')
-    const email = fields.get('email')
-    const message = fields.get('message')
-    const subject = encodeURIComponent(`Portfolio message from ${name}`)
-    const body = encodeURIComponent(`From: ${name}\nEmail: ${email}\n\n${message}`)
-    window.location.href = `mailto:${socialLinks.email.value}?subject=${subject}&body=${body}`
+    const form = event.currentTarget
+    const fields = new FormData(form)
+    setSendState('sending')
+
+    try {
+      const response = await fetch(`https://formsubmit.co/ajax/${socialLinks.email.value}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: fields.get('name'),
+          email: fields.get('email'),
+          message: fields.get('message'),
+          _replyto: fields.get('email'),
+          _subject: `Portfolio message from ${fields.get('name')}`,
+          _template: 'table',
+        }),
+      })
+      const result = await response.json()
+      if (!response.ok || (result.success !== true && result.success !== 'true')) {
+        throw new Error('Message could not be sent.')
+      }
+
+      form.reset()
+      setSendState('sent')
+    } catch {
+      setSendState('error')
+    }
   }
 
   const secondaryLinks = [socialLinks.facebook, socialLinks.instagram, socialLinks.tiktok]
@@ -617,10 +634,17 @@ function Contact() {
               <span>Your message</span>
               <textarea name="message" placeholder="Write your message" required rows="5" />
             </label>
-            <button className="button button--primary" type="submit">
-              Send message <Icon name="arrowUpRight" size={17} />
+            <button className="button button--primary" disabled={sendState === 'sending'} type="submit">
+              {sendState === 'sending' ? 'Sending…' : sendState === 'sent' ? 'Message sent' : 'Send message'}
+              {sendState !== 'sending' && <Icon name={sendState === 'sent' ? 'check' : 'arrowUpRight'} size={17} />}
             </button>
-            <p className="contact-form__note">Opens your email app to send the message.</p>
+            <p aria-live="polite" className="contact-form__note">
+              {sendState === 'sent'
+                ? 'Thanks! Your message was sent. You can reply directly from the email in your inbox.'
+                : sendState === 'error'
+                  ? 'Could not send your message. Please try again or email me directly.'
+                  : 'Your message will be sent to my inbox. I can reply directly to your email.'}
+            </p>
           </form>
         </div>
         <div className="contact-directory">
@@ -668,21 +692,38 @@ function navigateAdmin(path, replace = false) {
 function AdminLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [inviteFlow, setInviteFlow] = useState(() => new URLSearchParams(window.location.search).get('invite') === '1')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
     if (!isSupabaseConfigured) return
+    if (inviteFlow) {
+      getCurrentUser().then((user) => {
+        if (!user) setError('This invitation link is invalid or has expired. Request a new invite.')
+      }).catch((authError) => setError(authError.message))
+      return
+    }
     getCurrentUser().then(async (user) => {
       if (user && await isPortfolioAdmin()) navigateAdmin('/admin/dashboard', true)
     }).catch(() => {})
-  }, [])
+  }, [inviteFlow])
 
   async function submit(event) {
     event.preventDefault()
     setBusy(true)
     setError('')
     try {
+      if (inviteFlow) {
+        if (password.length < 8) throw new Error('Use a password with at least 8 characters.')
+        if (password !== confirmPassword) throw new Error('The passwords do not match.')
+        if (!await isPortfolioAdmin()) throw new Error('This account is not authorized to manage this portfolio.')
+        await updateCurrentUserPassword(password)
+        setInviteFlow(false)
+        navigateAdmin('/admin/dashboard', true)
+        return
+      }
       await signInWithPassword(email, password)
       if (!await isPortfolioAdmin()) {
         await signOut()
@@ -700,15 +741,16 @@ function AdminLogin() {
     <main className="admin-auth-shell">
       <section className="admin-auth-card">
         <a className="brand" href="/#/home">JEDRICK<span className="brand-dot">.</span></a>
-        <span className="eyebrow">Private area</span>
-        <h1>Admin sign in</h1>
-        <p>Sign in using the administrator account authorized for this portfolio.</p>
+        <span className="eyebrow">{inviteFlow ? 'Admin invitation' : 'Private area'}</span>
+        <h1>{inviteFlow ? 'Set your password' : 'Admin sign in'}</h1>
+        <p>{inviteFlow ? 'Choose a password to finish setting up your administrator account.' : 'Sign in using the administrator account authorized for this portfolio.'}</p>
         {!isSupabaseConfigured && <p className="admin-auth-error" role="alert">Add the Supabase project URL and anon key to <code>.env.local</code> before signing in.</p>}
         <form className="admin-form admin-auth-form" onSubmit={submit}>
-          <label><span>Email</span><input autoComplete="username" name="email" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} /></label>
-          <label><span>Password</span><input autoComplete="current-password" name="password" onChange={(event) => setPassword(event.target.value)} required type="password" value={password} /></label>
+          {!inviteFlow && <label><span>Email</span><input autoComplete="username" name="email" onChange={(event) => setEmail(event.target.value)} required type="email" value={email} /> </label>}
+          <label><span>{inviteFlow ? 'New password' : 'Password'}</span><input autoComplete={inviteFlow ? 'new-password' : 'current-password'} minLength={inviteFlow ? 8 : undefined} name="password" onChange={(event) => setPassword(event.target.value)} required type="password" value={password} /></label>
+          {inviteFlow && <label><span>Confirm password</span><input autoComplete="new-password" minLength={8} name="confirm-password" onChange={(event) => setConfirmPassword(event.target.value)} required type="password" value={confirmPassword} /></label>}
           {error && <p className="admin-auth-error" role="alert">{error}</p>}
-          <button className="button button--primary" disabled={busy || !isSupabaseConfigured} type="submit">{busy ? 'Signing in…' : 'Sign in'} <Icon name="arrowUpRight" size={17} /></button>
+          <button className="button button--primary" disabled={busy || !isSupabaseConfigured} type="submit">{busy ? (inviteFlow ? 'Saving…' : 'Signing in…') : (inviteFlow ? 'Set password' : 'Sign in')} <Icon name="arrowUpRight" size={17} /></button>
         </form>
         <a className="text-link" href="/#/home">Return to portfolio</a>
       </section>
@@ -927,13 +969,9 @@ function Footer() {
   return (
     <footer className="site-footer">
       <div className="page-grid footer-grid">
-        <a className="brand" href="#/home" aria-label="Back to home">
-          JEDRICK<span className="brand-dot">.</span>
-        </a>
         <p>© 2026 Jedrick Relshey Miclat. All Rights Reserved.</p>
         <div className="footer-links">
           <a href={socialLinks.github.href} {...externalLinkProps}>GitHub</a>
-          <a href={socialLinks.email.href}>Email</a>
           <a href="#/home">Home <Icon name="arrowUpRight" size={14} /></a>
         </div>
       </div>
@@ -973,6 +1011,10 @@ export default function App() {
       window.removeEventListener('hashchange', syncPage)
       window.removeEventListener('popstate', syncPage)
     }
+  }, [])
+
+  useEffect(() => {
+    if (consumeAuthRedirect()) navigateAdmin('/admin/login?invite=1', true)
   }, [])
 
   useEffect(() => {

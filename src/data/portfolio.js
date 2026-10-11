@@ -126,8 +126,8 @@ export const projects = [
 export const socialLinks = {
   email: {
     label: 'Email',
-    value: 'miclatjedrick8@gmail.com',
-    href: 'mailto:miclatjedrick8@gmail.com',
+    value: 'miclatjedrick06@gmail.com',
+    href: 'mailto:miclatjedrick06@gmail.com',
     icon: 'mail',
   },
   github: {
@@ -139,9 +139,9 @@ export const socialLinks = {
   linkedin: {
     label: 'LinkedIn',
     value: 'Jedrick Miclat',
-    href: null,
+    href: 'https://www.linkedin.com/in/jedrick-miclat-b91baa361/',
     icon: 'linkedin',
-    note: 'Profile link to be added',
+    note: 'LinkedIn profile',
   },
   facebook: {
     label: 'Facebook',
