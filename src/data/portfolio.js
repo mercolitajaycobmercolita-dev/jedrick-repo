@@ -13,37 +13,64 @@ export const skillGroups = [
   {
     label: 'Programming Languages',
     note: 'Languages used for programming and web development.',
-    skills: ['Java', 'JavaScript', 'Python', 'PHP'],
+    skills: [
+      { name: 'Java', icon: 'https://cdn.simpleicons.org/java' },
+      { name: 'JavaScript', icon: 'https://cdn.simpleicons.org/javascript' },
+      { name: 'Python', icon: 'https://cdn.simpleicons.org/python' },
+      { name: 'PHP', icon: 'https://cdn.simpleicons.org/php' },
+    ],
   },
   {
     label: 'Frameworks & Build Tools',
     note: 'Tools used to build this portfolio website.',
-    skills: ['React', 'Vite'],
+    skills: [
+      { name: 'React', icon: 'https://cdn.simpleicons.org/react' },
+      { name: 'Vite', icon: 'https://cdn.simpleicons.org/vite' },
+    ],
   },
   {
     label: 'Web Technologies',
     note: 'The core markup and styling used throughout the portfolio.',
-    skills: ['HTML5', 'CSS3'],
+    skills: [
+      { name: 'HTML5', icon: 'https://cdn.simpleicons.org/html5' },
+      { name: 'CSS3', icon: 'https://cdn.simpleicons.org/css3' },
+    ],
   },
   {
     label: 'Database',
     note: 'Portfolio content and authentication are powered by Supabase.',
-    skills: ['Supabase', 'PostgreSQL'],
+    skills: [
+      { name: 'Supabase', icon: 'https://cdn.simpleicons.org/supabase' },
+      { name: 'PostgreSQL', icon: 'https://cdn.simpleicons.org/postgresql' },
+    ],
   },
   {
     label: 'IDEs',
     note: 'Editors and environments used to write and manage code.',
-    skills: ['Visual Studio Code', 'Visual Studio', 'Eclipse IDE'],
+    skills: [
+      { name: 'Visual Studio Code', icon: 'https://cdn.simpleicons.org/visualstudiocode' },
+      { name: 'Visual Studio', icon: 'https://cdn.simpleicons.org/visualstudio' },
+      { name: 'Eclipse IDE', icon: 'https://cdn.simpleicons.org/eclipseide' },
+    ],
   },
   {
     label: 'Development Tools',
     note: 'Tools used for version control and deploying the portfolio.',
-    skills: ['Git', 'GitHub', 'Vercel'],
+    skills: [
+      { name: 'Git', icon: 'https://cdn.simpleicons.org/git' },
+      { name: 'GitHub', icon: 'https://cdn.simpleicons.org/github' },
+      { name: 'Vercel', icon: 'https://cdn.simpleicons.org/vercel' },
+    ],
   },
   {
     label: 'Design Tools',
     note: 'Tools for design, image editing, and video editing.',
-    skills: ['Canva', 'Figma', 'Adobe Photoshop', 'CapCut'],
+    skills: [
+      { name: 'Canva', icon: 'https://cdn.simpleicons.org/canva' },
+      { name: 'Figma', icon: 'https://cdn.simpleicons.org/figma' },
+      { name: 'Adobe Photoshop', icon: 'https://cdn.simpleicons.org/adobephotoshop' },
+      { name: 'CapCut', icon: 'https://commons.wikimedia.org/wiki/Special:FilePath/Capcut-icon.svg' },
+    ],
   },
 ]
 

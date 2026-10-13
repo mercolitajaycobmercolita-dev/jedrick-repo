@@ -204,26 +204,39 @@ function About() {
     <section className="section section--about" id="about" aria-labelledby="about-title" data-reveal>
       <div className="page-grid about-grid">
         <SectionHeading
-          eyebrow="The person behind the work"
+          eyebrow="About me"
           number="02"
-          title="Curiosity is my starting point."
-          intro="I’m building my path one project, one problem, and one lesson at a time."
+          title="Turning curiosity into practical skills."
+          intro="Hi, I'm Jedrick, an aspiring full-stack developer and a second-year BS Information Technology student at Dominican College of Tarlac."
           titleId="about-title"
           level="h1"
         />
         <div className="about-content">
           <p className="lead-copy">
-            I&apos;m developing the foundations to become a thoughtful full-stack developer: learning
-            how good software is planned, built, and improved one project at a time.
+            I'm passionate about web development, problem-solving, and creating digital experiences
+            that are both functional and meaningful. I enjoy learning how things work, experimenting
+            with new technologies, and applying what I learn through hands-on projects.
           </p>
           <p>
-            My focus is practical development—making ideas clear, functional, and worth using.
-            Every project is an opportunity to grow my technical confidence, solve a real problem,
-            and sharpen how I think.
+            My goal is to become a well-rounded developer who can build reliable, user-friendly
+            applications while continuously improving my technical skills. I'm also interested in
+            cybersecurity and understanding how to make web applications more secure.
           </p>
-          <a className="text-link" href="#/contact">
-            Start a conversation <Icon name="arrowUpRight" size={17} />
-          </a>
+          <p>
+            I believe growth comes from consistency, curiosity, and the willingness to learn from
+            mistakes. I'm still building my foundation, but every project brings me one step closer
+            to becoming the developer I want to be.
+          </p>
+          <div className="about-focus">
+            <h2>What I'm working toward</h2>
+            <ul>
+              <li><strong>Web Development:</strong> Improving my HTML, CSS, JavaScript, and WordPress skills.</li>
+              <li><strong>Full-Stack Development:</strong> Learning how frontend and backend technologies work together.</li>
+              <li><strong>Cybersecurity:</strong> Exploring web security and secure development practices.</li>
+              <li><strong>Project Building:</strong> Applying my knowledge to practical projects and real-world problems.</li>
+            </ul>
+          </div>
+          <p className="about-goal"><strong>My goal is simple:</strong> Keep learning, keep building, and create something useful with every opportunity.</p>
         </div>
         <aside className="education-sheet" aria-label="Education">
           
@@ -270,8 +283,13 @@ function Skills() {
                 <h3>{group.label}</h3>
                 <p>{group.note}</p>
               </div>
-              <div className="skill-tags" aria-label={`${group.label} technologies`}>
-                {group.skills.map((skill) => <span key={skill}>{skill}</span>)}
+          <div className="skill-tags" aria-label={`${group.label} technologies`}>
+            {group.skills.map((skill) => (
+              <span className="skill-tag" key={skill.name}>
+                <img src={skill.icon} alt="" aria-hidden="true" loading="lazy" onError={(event) => event.currentTarget.remove()} />
+                {skill.name}
+              </span>
+            ))}
               </div>
             </article>
           ))}
