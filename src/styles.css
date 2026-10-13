@@ -458,12 +458,16 @@ h1 span { display: inline; color: var(--accent); }
   display: grid;
   place-items: center;
   padding: 1.2rem;
+  overflow-y: auto;
   background: rgba(0, 0, 0, 0.76);
   backdrop-filter: blur(8px);
 }
 
 .equipment-dialog {
   width: min(100%, 580px);
+  max-height: min(88dvh, 900px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: clamp(1.5rem, 5vw, 3rem);
   border: 1px solid var(--line-strong);
   background: var(--ink-raised);
@@ -609,7 +613,7 @@ h1 span { display: inline; color: var(--accent); }
 .certificate-card > span { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; }
 .certificate-card strong { font-size: 0.84rem; }
 .certificate-card .icon { color: var(--accent); flex: none; }
-.certificate-dialog { position: relative; width: min(760px, 100%); max-height: min(88vh, 900px); overflow: auto; padding: 1.3rem; border: 1px solid var(--line-strong); background: var(--ink-raised); }
+.certificate-dialog { position: relative; width: min(760px, 100%); max-height: min(88dvh, 900px); overflow: auto; overscroll-behavior: contain; padding: 1.3rem; border: 1px solid var(--line-strong); background: var(--ink-raised); }
 .certificate-dialog > img { display: block; max-height: 58vh; width: 100%; margin-bottom: 1.3rem; object-fit: contain; background: var(--ink); }
 .certificate-dialog h2 { margin: 0.4rem 0; }
 .certificate-dialog p { color: var(--muted-strong); line-height: 1.65; }

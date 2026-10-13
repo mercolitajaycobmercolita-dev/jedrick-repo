@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Icon } from './components/Icon.jsx'
 import { SectionHeading } from './components/SectionHeading.jsx'
 import {
@@ -34,6 +35,25 @@ import {
 const externalLinkProps = {
   target: '_blank',
   rel: 'noreferrer',
+}
+
+function ViewportDialog({ children, onClose }) {
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [])
+
+  return createPortal(
+    <div className="equipment-dialog-backdrop" onClick={(event) => {
+      if (event.target === event.currentTarget) onClose()
+    }}>
+      {children}
+    </div>,
+    document.body,
+  )
 }
 
 function Navbar({ activePage }) {
@@ -418,9 +438,7 @@ function Achievements() {
         </div>}
       </div>
       {activeCertificate && (
-        <div className="equipment-dialog-backdrop" onClick={(event) => {
-          if (event.target === event.currentTarget) setActiveCertificate(null)
-        }}>
+        <ViewportDialog onClose={() => setActiveCertificate(null)}>
           <section className="certificate-dialog" role="dialog" aria-modal="true" aria-labelledby="certificate-dialog-title">
             <button aria-label="Close dialog" className="dialog-close" onClick={() => setActiveCertificate(null)} type="button">×</button>
             <img src={activeCertificate.image} alt={`${activeCertificate.title} certificate`} />
@@ -428,7 +446,7 @@ function Achievements() {
             <h2 id="certificate-dialog-title">{activeCertificate.title}</h2>
             <p>{activeCertificate.description}</p>
           </section>
-        </div>
+        </ViewportDialog>
       )}
     </section>
   )
@@ -497,9 +515,7 @@ function Equipment() {
         </div>
       </div>
       {activeItem && (
-        <div className="equipment-dialog-backdrop" onClick={(event) => {
-          if (event.target === event.currentTarget) setActiveItem(null)
-        }}>
+        <ViewportDialog onClose={() => setActiveItem(null)}>
           <section className="equipment-dialog" role="dialog" aria-modal="true" aria-labelledby="equipment-dialog-title">
             <div className="equipment-dialog__topline">
               <span className="eyebrow">Detail view</span>
@@ -512,7 +528,7 @@ function Equipment() {
             <span className="eyebrow">Purpose</span>
             <strong>{activeItem.purpose}</strong>
           </section>
-        </div>
+        </ViewportDialog>
       )}
     </section>
   )
