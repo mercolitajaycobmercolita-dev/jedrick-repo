@@ -211,6 +211,21 @@ function About() {
           titleId="about-title"
           level="h1"
         />
+        <aside className="education-sheet" aria-label="Education">
+          <div className="sheet-header">
+            <span className="eyebrow">Education / current</span>
+            <Icon name="hash" size={19} />
+          </div>
+          <div className="school-mark">DCT</div>
+          <div className="education-details">
+            <h3>{education.school}</h3>
+            <p>{education.course}</p>
+            <div className="education-meta">
+              <span>{education.year}</span>
+              <span>{education.graduation}</span>
+            </div>
+          </div>
+        </aside>
         <div className="about-content">
           <p className="lead-copy">
             I'm passionate about web development, problem-solving, and creating digital experiences
@@ -238,22 +253,6 @@ function About() {
           </div>
           <p className="about-goal"><strong>My goal is simple:</strong> Keep learning, keep building, and create something useful with every opportunity.</p>
         </div>
-        <aside className="education-sheet" aria-label="Education">
-          
-          <div className="sheet-header">
-            <span className="eyebrow">Education / current</span>
-            <Icon name="hash" size={19} />
-          </div>
-          <div className="school-mark">DCT</div>
-          <div className="education-details">
-            <h3>{education.school}</h3>
-            <p>{education.course}</p>
-            <div className="education-meta">
-              <span>{education.year}</span>
-              <span>{education.graduation}</span>
-            </div>
-          </div>
-        </aside>
       </div>
     </section>
   )
@@ -284,12 +283,7 @@ function Skills() {
                 <p>{group.note}</p>
               </div>
           <div className="skill-tags" aria-label={`${group.label} technologies`}>
-            {group.skills.map((skill) => (
-              <span className="skill-tag" key={skill.name}>
-                <img src={skill.icon} alt="" aria-hidden="true" loading="lazy" onError={(event) => event.currentTarget.remove()} />
-                {skill.name}
-              </span>
-            ))}
+                {group.skills.map((skill) => <span className="skill-tag" key={skill}>{skill}</span>)}
               </div>
             </article>
           ))}

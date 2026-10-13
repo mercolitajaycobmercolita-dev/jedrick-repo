@@ -13,64 +13,37 @@ export const skillGroups = [
   {
     label: 'Programming Languages',
     note: 'Languages used for programming and web development.',
-    skills: [
-      { name: 'Java', icon: '/IMAGES/java-logo.ico' },
-      { name: 'JavaScript', icon: '/IMAGES/js-logo.ico' },
-      { name: 'Python', icon: '/IMAGES/Python-Emblem.ico' },
-      { name: 'PHP', icon: '/IMAGES/php-log.ico' },
-    ],
+    skills: ['Java', 'JavaScript', 'Python', 'PHP'],
   },
   {
     label: 'Frameworks & Build Tools',
     note: 'Tools used to build this portfolio website.',
-    skills: [
-      { name: 'React', icon: '/IMAGES/react-logo-1.ico' },
-      { name: 'Vite', icon: '/IMAGES/vite-logo.ico' },
-    ],
+    skills: ['React', 'Vite'],
   },
   {
     label: 'Web Technologies',
     note: 'The core markup and styling used throughout the portfolio.',
-    skills: [
-      { name: 'HTML5', icon: '/IMAGES/html-logo.ico' },
-      { name: 'CSS3', icon: '/IMAGES/css3-logo.ico' },
-    ],
+    skills: ['HTML5', 'CSS3'],
   },
   {
     label: 'Database',
     note: 'Portfolio content and authentication are powered by Supabase.',
-    skills: [
-      { name: 'Supabase', icon: '/IMAGES/supabase-logo.ico' },
-      { name: 'PostgreSQL', icon: '/IMAGES/PostgreSQL-Logo.ico' },
-    ],
+    skills: ['Supabase', 'PostgreSQL'],
   },
   {
     label: 'IDEs',
     note: 'Editors and environments used to write and manage code.',
-    skills: [
-      { name: 'Visual Studio Code', icon: '/IMAGES/visual-studio-code-logo-2.ico' },
-      { name: 'Visual Studio', icon: 'https://cdn.simpleicons.org/visualstudio' },
-      { name: 'Eclipse IDE', icon: '/IMAGES/eclipse-logo.ico' },
-    ],
+    skills: ['Visual Studio Code', 'Visual Studio', 'Eclipse IDE'],
   },
   {
     label: 'Development Tools',
     note: 'Tools used for version control and deploying the portfolio.',
-    skills: [
-      { name: 'Git', icon: '/IMAGES/git.ico' },
-      { name: 'GitHub', icon: '/IMAGES/github_logo.ico' },
-      { name: 'Vercel', icon: '/IMAGES/logo-vercel.ico' },
-    ],
+    skills: ['Git', 'GitHub', 'Vercel'],
   },
   {
     label: 'Design Tools',
     note: 'Tools for design, image editing, and video editing.',
-    skills: [
-      { name: 'Canva', icon: '/IMAGES/canva-logo.ico' },
-      { name: 'Figma', icon: 'https://cdn.simpleicons.org/figma' },
-      { name: 'Adobe Photoshop', icon: '/IMAGES/adobe-photoshop-logo.ico' },
-      { name: 'CapCut', icon: '/IMAGES/capcut-logo.ico' },
-    ],
+    skills: ['Canva', 'Figma', 'Adobe Photoshop', 'CapCut'],
   },
 ]
 
