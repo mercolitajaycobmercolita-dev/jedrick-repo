@@ -115,7 +115,7 @@ export async function removeContent(table, item) {
 }
 
 export function usePortfolioContent(table, fallback = []) {
-  const [items, setItems] = useState(fallback)
+  const [items, setItems] = useState(() => isSupabaseConfigured ? [] : fallback)
   const [loading, setLoading] = useState(isSupabaseConfigured)
   const [error, setError] = useState('')
 
@@ -131,7 +131,10 @@ export function usePortfolioContent(table, fallback = []) {
     load().then((records) => {
       if (active) setItems(records)
     }).catch((loadError) => {
-      if (active) setError(loadError.message)
+      if (active) {
+        setItems([])
+        setError(loadError.message)
+      }
     }).finally(() => {
       if (active) setLoading(false)
     })
