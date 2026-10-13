@@ -421,21 +421,21 @@ function Achievements() {
 
 const equipmentItems = [
   {
-    category: 'Display', title: 'Monitor', image: '/IMAGES/monitor.jpg', summary: 'An external display for workspace tasks.', note: 'Exact model details can be added later.', purpose: 'Coding and study',
+    category: 'Display', title: 'Monitor', image: '/IMAGES/monitor.jpg', summary: 'An external display for workspace tasks.', purpose: 'Coding and study',
   },
   {
-    category: 'Input', title: 'Keyboard', image: '/IMAGES/keyboard.jpg', summary: 'A keyboard for everyday computer work.', note: 'Exact model details can be added later.', purpose: 'Typing and development',
+    category: 'Input', title: 'Keyboard', image: '/IMAGES/keyboard.jpg', summary: 'A keyboard for everyday computer work.', purpose: 'Typing and development',
   },
   {
-    category: 'Input', title: 'Mouse', image: '/IMAGES/mouse.jpg', summary: 'A mouse for navigation and precise interaction.', note: 'Exact model details can be added later.', purpose: 'Everyday computer navigation',
+    category: 'Input', title: 'Mouse', image: '/IMAGES/mouse.jpg', summary: 'A mouse for navigation and precise interaction.', purpose: 'Everyday computer navigation',
   },
   {
-    category: 'Workspace', title: 'Desk chair', image: '/IMAGES/chair.jpg', summary: 'Seating for study and project sessions.', note: 'Exact model details can be added later.', purpose: 'Study and project work',
+    category: 'Workspace', title: 'Desk chair', image: '/IMAGES/chair.jpg', summary: 'Seating for study and project sessions.', purpose: 'Study and project work',
   },
-  { category: 'Workspace', title: 'Table', image: '/IMAGES/table.jpg', summary: 'A surface for my computer and work materials.', note: 'Exact model details can be added later.', purpose: 'Organizing the workspace' },
-  { category: 'Workspace', title: 'Monitor desk mount', image: '/IMAGES/Desk%20Mount%20Bracket%20Computer%20Monitor.jpg', summary: 'A mount for positioning a monitor.', note: 'Exact model details can be added later.', purpose: 'Workspace arrangement' },
-  { category: 'Audio', title: 'Speaker', image: '/IMAGES/speaker.jpg', summary: 'Audio equipment for the workspace.', note: 'Exact model details can be added later.', purpose: 'Audio playback' },
-  { category: 'Camera', title: 'Web camera', image: '/IMAGES/camera.jpg', summary: 'A camera for online sessions and calls.', note: 'Exact model details can be added later.', purpose: 'Video calls and online sessions' },
+  { category: 'Workspace', title: 'Table', image: '/IMAGES/table.jpg', summary: 'A surface for my computer and work materials.', purpose: 'Organizing the workspace' },
+  { category: 'Workspace', title: 'Monitor desk mount', image: '/IMAGES/Desk%20Mount%20Bracket%20Computer%20Monitor.jpg', summary: 'A mount for positioning a monitor.', purpose: 'Workspace arrangement' },
+  { category: 'Audio', title: 'Speaker', image: '/IMAGES/speaker.jpg', summary: 'Audio equipment for the workspace.', purpose: 'Audio playback' },
+  { category: 'Camera', title: 'Web camera', image: '/IMAGES/camera.jpg', summary: 'A camera for online sessions and calls.', purpose: 'Video calls and online sessions' },
 ]
 
 function Equipment() {
@@ -457,7 +457,7 @@ function Equipment() {
           eyebrow="My equipment"
           number="05"
           title="The setup behind the work."
-          intro="A personal tech profile—not a spec sheet. Exact equipment details will be added as the setup evolves."
+          intro="The tools I use for studying, building projects, and learning."
           titleId="equipment-title"
           level="h1"
         />
@@ -490,7 +490,7 @@ function Equipment() {
             <span className="eyebrow">{activeItem.category}</span>
             <h2 id="equipment-dialog-title">{activeItem.title}</h2>
             <img className="equipment-dialog__image" src={activeItem.image} alt={activeItem.title} />
-            <p>{activeItem.summary} {activeItem.note}</p>
+            <p>{activeItem.summary}</p>
             <span className="eyebrow">Purpose</span>
             <strong>{activeItem.purpose}</strong>
           </section>
