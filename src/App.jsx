@@ -591,6 +591,8 @@ function Journey() {
 function Contact() {
   const [copied, setCopied] = useState(false)
   const [sendState, setSendState] = useState('idle')
+  const [sendError, setSendError] = useState('')
+  const [fallbackHref, setFallbackHref] = useState('')
 
   async function copyEmail() {
     try {
@@ -607,6 +609,8 @@ function Contact() {
     const form = event.currentTarget
     const fields = new FormData(form)
     setSendState('sending')
+    setSendError('')
+    setFallbackHref('')
 
     try {
       const response = await fetch(`https://formsubmit.co/ajax/${socialLinks.email.value}`, {
@@ -621,14 +625,25 @@ function Contact() {
           _template: 'table',
         }),
       })
-      const result = await response.json()
+      const result = await response.json().catch(() => ({}))
       if (!response.ok || (result.success !== true && result.success !== 'true')) {
-        throw new Error('Message could not be sent.')
+        throw new Error(result.message || `Email service returned an error (${response.status}).`)
       }
 
       form.reset()
       setSendState('sent')
-    } catch {
+    } catch (error) {
+      const details = error instanceof Error ? error.message : ''
+      const subject = `Portfolio message from ${fields.get('name')}`
+      const body = `From: ${fields.get('name')}\nReply to: ${fields.get('email')}\n\n${fields.get('message')}`
+      setFallbackHref(`${socialLinks.email.href}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)
+      setSendError(
+        details.includes('Failed to fetch')
+          ? 'Hindi maabot ang email service. Suriin ang internet connection at subukan muli. Kung unang gamit ito, kumpirmahin muna ang activation email ng FormSubmit sa inbox o spam.'
+          : details
+            ? `${details} Kung unang gamit ito, tingnan din ang inbox o spam para sa FormSubmit activation email.`
+            : 'Hindi naipadala. Tingnan ang inbox o spam para sa FormSubmit activation email, pagkatapos ay subukan muli.'
+      )
       setSendState('error')
     }
   }
@@ -672,13 +687,25 @@ function Contact() {
               {sendState === 'sending' ? 'Sending…' : sendState === 'sent' ? 'Message sent' : 'Send message'}
               {sendState !== 'sending' && <Icon name={sendState === 'sent' ? 'check' : 'arrowUpRight'} size={17} />}
             </button>
-            <p aria-live="polite" className="contact-form__note">
+            <p
+              aria-live={sendState === 'error' ? 'assertive' : 'polite'}
+              className={`contact-form__note${sendState === 'idle' ? '' : ` contact-form__note--${sendState}`}`}
+              role={sendState === 'error' ? 'alert' : 'status'}
+            >
               {sendState === 'sent'
-                ? 'Thanks! Your message was sent. You can reply directly from the email in your inbox.'
+                ? 'Message sent successfully. I can reply directly to the email address you provided.'
                 : sendState === 'error'
-                  ? 'Could not send your message. Please try again or email me directly.'
-                  : 'Your message will be sent to my inbox. I can reply directly to your email.'}
+                  ? sendError
+                  : sendState === 'sending'
+                    ? 'Sending your message…'
+                    : 'Your message will be sent to my inbox. I can reply directly to your email.'}
             </p>
+            {sendState === 'error' && (
+              <a className="contact-form__fallback" href={fallbackHref}>
+                Open your email app with this message
+                <Icon name="arrowUpRight" size={15} />
+              </a>
+            )}
           </form>
         </div>
         <div className="contact-directory">
