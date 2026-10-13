@@ -11,34 +11,39 @@ export const navigationItems = [
 
 export const skillGroups = [
   {
-    label: 'Frontend',
-    note: 'Building clear, responsive web interfaces.',
-    skills: ['HTML5', 'CSS3', 'JavaScript', 'React'],
+    label: 'Programming Languages',
+    note: 'Languages used for programming and web development.',
+    skills: ['Java', 'JavaScript', 'Python', 'PHP'],
   },
   {
-    label: 'Programming',
-    note: 'Practicing problem-solving through different programming tools.',
-    skills: ['Python', 'VB.NET'],
+    label: 'Frameworks & Build Tools',
+    note: 'Tools used to build this portfolio website.',
+    skills: ['React', 'Vite'],
   },
   {
-    label: 'Backend / Database',
-    note: 'Exploring backend services and data.',
-    skills: ['Supabase'],
+    label: 'Web Technologies',
+    note: 'The core markup and styling used throughout the portfolio.',
+    skills: ['HTML5', 'CSS3'],
   },
   {
-    label: 'Version control',
-    note: 'Keeping project changes organized and shareable.',
-    skills: ['Git', 'GitHub'],
+    label: 'Database',
+    note: 'Portfolio content and authentication are powered by Supabase.',
+    skills: ['Supabase', 'PostgreSQL'],
   },
   {
-    label: 'Deployment',
-    note: 'Learning how to publish web projects.',
-    skills: ['Vercel'],
+    label: 'IDEs',
+    note: 'Editors and environments used to write and manage code.',
+    skills: ['Visual Studio Code', 'Visual Studio', 'Eclipse IDE'],
   },
   {
-    label: 'CMS',
-    note: 'Exploring content management workflows.',
-    skills: ['WordPress'],
+    label: 'Development Tools',
+    note: 'Tools used for version control and deploying the portfolio.',
+    skills: ['Git', 'GitHub', 'Vercel'],
+  },
+  {
+    label: 'Design Tools',
+    note: 'Tools for design, image editing, and video editing.',
+    skills: ['Canva', 'Figma', 'Adobe Photoshop', 'CapCut'],
   },
 ]
 

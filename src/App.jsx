@@ -1007,7 +1007,7 @@ function AdminDashboard({ user }) {
           <>
             <form className="admin-form" key={editingEquipment?.id || 'new-equipment'} onSubmit={submitEquipment}>
               <h2>{editingEquipment ? 'Edit equipment' : 'Add equipment'}</h2>
-              <label><span>Equipment name</span><input defaultValue={editingEquipment?.title || ''} name="title" placeholder="Graphics card" required /></label>
+              <label><span>Equipment name</span><input defaultValue={editingEquipment?.title || ''} name="title" placeholder="Enter equipment name" required /></label>
               <label><span>Category</span><input defaultValue={editingEquipment?.category || ''} name="category" placeholder="Computer hardware" /></label>
               <label><span>Description</span><textarea defaultValue={editingEquipment?.summary || ''} name="summary" placeholder="A short description of this item." required rows="3" /></label>
               <label><span>Purpose</span><input defaultValue={editingEquipment?.purpose || ''} name="purpose" placeholder="Gaming, study, or development" /></label>

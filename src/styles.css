@@ -426,10 +426,8 @@ h1 span { display: inline; color: var(--accent); }
 .equipment-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
+  gap: 1rem;
   margin-top: clamp(2.5rem, 6vw, 5rem);
-  border: 1px solid var(--line);
-  background: var(--line);
 }
 
 .equipment-card {
@@ -439,6 +437,7 @@ h1 span { display: inline; color: var(--accent); }
   flex-direction: column;
   align-items: flex-start;
   padding: clamp(1.35rem, 3vw, 2.5rem);
+  border: 1px solid var(--line);
   background: var(--ink);
   transition: background 180ms ease;
 }
