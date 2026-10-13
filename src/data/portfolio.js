@@ -131,8 +131,8 @@ export const projects = [
 export const socialLinks = {
   email: {
     label: 'Email',
-    value: 'miclatjedrick06@gmail.com',
-    href: 'mailto:miclatjedrick06@gmail.com',
+    value: 'miclatjedrick8@gmail.com',
+    href: 'mailto:miclatjedrick8@gmail.com',
     icon: 'mail',
   },
   github: {
