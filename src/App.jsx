@@ -682,7 +682,7 @@ function Contact() {
               role={sendState === 'error' ? 'alert' : 'status'}
             >
               {sendState === 'sent'
-                ? 'Message sent successfully. I can reply directly to the email address you provided.'
+                ? 'Message sent successfully. Thank you for reaching out.'
                 : sendState === 'error'
                   ? sendError
                   : sendState === 'sending'
