@@ -6,8 +6,9 @@ This project uses Supabase Auth, PostgREST, and Storage through the browser's bu
 
 1. Create a Supabase project.
 2. Open **SQL Editor** in its dashboard.
-3. Run all of `supabase/schema.sql`. It creates the content tables, policies, public image bucket, and seed rows for the current six projects.
-4. Existing project screenshots remain served from `public/IMAGES`. Newly uploaded project and certificate images go to the Supabase `portfolio-media` bucket.
+3. Run all of `supabase/schema.sql`. It creates the project and certificate tables, policies, public image bucket, and seed rows for the current six projects.
+4. Run `supabase/equipment.sql` once. It creates the equipment table and policies, then copies the current eight equipment cards into Supabase without duplicating them if you run it again.
+5. Existing project and equipment images remain served from `public/IMAGES`. Newly uploaded project, certificate, and equipment images go to the Supabase `portfolio-media` bucket.
 
 ## 2. Create the one administrator account
 
@@ -36,7 +37,7 @@ VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_OR_PUBLISHABLE_KEY
 ```
 
 3. Restart Vite after editing the environment file.
-4. Open `http://localhost:5173/admin/login`, sign in with the invited administrator account, and manage projects and certificates at `/admin/dashboard`.
+4. Open `http://localhost:5173/admin/login`, sign in with the invited administrator account, and manage projects, certificates, and equipment at `/admin/dashboard`.
 
 The anon/publishable key is designed for browser use. Never use or put a `service_role` / secret key in a `VITE_*` variable, source file, or public repository.
 
@@ -58,7 +59,7 @@ Configure the deployed host to serve the Vite `index.html` for both `/admin/logi
 - Sign in with any other Auth account: dashboard must deny access.
 - As an unauthenticated visitor, read published rows successfully; attempt an insert/update/delete and confirm Supabase returns an RLS error.
 - Upload as the admin, then try uploading/deleting the same bucket object while unauthenticated; confirm Storage rejects it.
-- Add a published record in Admin and refresh the public Projects or Achievements page to confirm it appears.
+- Add a published record in Admin and refresh the public Projects, Achievements, or Equipment page to confirm it appears.
 
 Live Auth, RLS, and Storage checks require the real Supabase URL/key and an account/project configured as above. The SQL and app build can be checked locally without those credentials.
 

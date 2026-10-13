@@ -12,6 +12,7 @@ import {
 
 export const ADMIN_PROJECTS_KEY = 'projects'
 export const ADMIN_CERTIFICATES_KEY = 'certificates'
+export const ADMIN_EQUIPMENT_KEY = 'equipment'
 
 function safeExternalUrl(value) {
   if (!value) return null
@@ -54,6 +55,20 @@ function mapCertificate(row) {
   }
 }
 
+function mapEquipment(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    category: row.category,
+    summary: row.summary,
+    purpose: row.purpose,
+    image: row.image_path ? publicImageUrl(row.image_path) : row.image_url,
+    imagePath: row.image_path,
+    isPublished: row.is_published,
+    displayOrder: row.display_order,
+  }
+}
+
 export async function fetchProjects({ admin = false } = {}) {
   const rows = admin ? await listAdminContent(ADMIN_PROJECTS_KEY) : await listPublicContent(ADMIN_PROJECTS_KEY)
   return rows.map(mapProject)
@@ -62,6 +77,11 @@ export async function fetchProjects({ admin = false } = {}) {
 export async function fetchCertificates({ admin = false } = {}) {
   const rows = admin ? await listAdminContent(ADMIN_CERTIFICATES_KEY) : await listPublicContent(ADMIN_CERTIFICATES_KEY)
   return rows.map(mapCertificate)
+}
+
+export async function fetchEquipment({ admin = false } = {}) {
+  const rows = admin ? await listAdminContent(ADMIN_EQUIPMENT_KEY) : await listPublicContent(ADMIN_EQUIPMENT_KEY)
+  return rows.map(mapEquipment)
 }
 
 export async function storeProject(values, file, existingPath = null) {
@@ -109,6 +129,27 @@ export async function storeCertificate(values, file, existingPath = null) {
   return mapCertificate(saved)
 }
 
+export async function storeEquipment(values, file, existingPath = null, existingImage = null) {
+  const imagePath = file ? await uploadPortfolioImage(file, 'equipment') : existingPath
+  if (!imagePath && !existingImage) throw new Error('Choose an equipment image.')
+  const row = {
+    ...(values.id ? { id: values.id } : {}),
+    title: values.title,
+    category: values.category || 'Equipment',
+    summary: values.summary,
+    purpose: values.purpose || null,
+    image_path: imagePath,
+    image_url: imagePath ? null : existingImage,
+    display_order: Number(values.displayOrder) || 0,
+    is_published: Boolean(values.isPublished),
+  }
+  const saved = await saveContent(ADMIN_EQUIPMENT_KEY, row)
+  if (file && existingPath && existingPath !== imagePath) {
+    await deletePortfolioImage(existingPath).catch(() => {})
+  }
+  return mapEquipment(saved)
+}
+
 export async function removeContent(table, item) {
   await deleteContent(table, item.id)
   if (item.imagePath) await deletePortfolioImage(item.imagePath).catch(() => {})
@@ -127,7 +168,11 @@ export function usePortfolioContent(table, fallback = []) {
       return undefined
     }
     setLoading(true)
-    const load = table === ADMIN_PROJECTS_KEY ? fetchProjects : fetchCertificates
+    const load = table === ADMIN_PROJECTS_KEY
+      ? fetchProjects
+      : table === ADMIN_CERTIFICATES_KEY
+        ? fetchCertificates
+        : fetchEquipment
     load().then((records) => {
       if (active) setItems(records)
     }).catch((loadError) => {

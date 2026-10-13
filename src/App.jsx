@@ -10,11 +10,14 @@ import {
 } from './data/portfolio.js'
 import {
   ADMIN_CERTIFICATES_KEY,
+  ADMIN_EQUIPMENT_KEY,
   ADMIN_PROJECTS_KEY,
   fetchCertificates,
+  fetchEquipment,
   fetchProjects,
   removeContent,
   storeCertificate,
+  storeEquipment,
   storeProject,
   usePortfolioContent,
 } from './data/adminStore.js'
@@ -439,6 +442,7 @@ const equipmentItems = [
 ]
 
 function Equipment() {
+  const { items, loading, error } = usePortfolioContent(ADMIN_EQUIPMENT_KEY, equipmentItems)
   const [activeItem, setActiveItem] = useState(null)
 
   useEffect(() => {
@@ -461,8 +465,10 @@ function Equipment() {
           titleId="equipment-title"
           level="h1"
         />
+        {loading && <p role="status">Loading published equipment…</p>}
+        {error && <p role="alert">Equipment could not be loaded: {error}</p>}
         <div className="equipment-grid">
-          {equipmentItems.map((item, index) => (
+          {items.map((item, index) => (
             <article className="equipment-card" key={item.title}>
               <span className="equipment-card__index">0{index + 1}</span>
               <button className="equipment-card__image-button" onClick={() => setActiveItem(item)} type="button" aria-label={`View ${item.title} image and details`}>
@@ -796,16 +802,23 @@ function AdminDashboard({ user }) {
   const [activeTab, setActiveTab] = useState('projects')
   const [projectsList, setProjectsList] = useState([])
   const [certificatesList, setCertificatesList] = useState([])
+  const [equipmentList, setEquipmentList] = useState([])
   const [editingProject, setEditingProject] = useState(null)
   const [editingCertificate, setEditingCertificate] = useState(null)
+  const [editingEquipment, setEditingEquipment] = useState(null)
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
   async function refresh() {
-    const [nextProjects, nextCertificates] = await Promise.all([fetchProjects({ admin: true }), fetchCertificates({ admin: true })])
+    const [nextProjects, nextCertificates, nextEquipment] = await Promise.all([
+      fetchProjects({ admin: true }),
+      fetchCertificates({ admin: true }),
+      fetchEquipment({ admin: true }),
+    ])
     setProjectsList(nextProjects)
     setCertificatesList(nextCertificates)
+    setEquipmentList(nextEquipment)
   }
 
   useEffect(() => {
@@ -878,6 +891,37 @@ function AdminDashboard({ user }) {
     }
   }
 
+  async function submitEquipment(event) {
+    event.preventDefault()
+    const form = event.currentTarget
+    const fields = new FormData(form)
+    const file = fields.get('image')
+    if (!editingEquipment && !file?.size) return setError('Choose an equipment image.')
+    if (file?.size > 5 * 1024 * 1024) return setError('Image must be 5 MB or smaller.')
+    setBusy(true)
+    setError('')
+    setNotice('')
+    try {
+      await storeEquipment({
+        id: editingEquipment?.id,
+        title: String(fields.get('title')).trim(),
+        category: String(fields.get('category')).trim(),
+        summary: String(fields.get('summary')).trim(),
+        purpose: String(fields.get('purpose')).trim(),
+        displayOrder: fields.get('displayOrder'),
+        isPublished: fields.get('isPublished') === 'on',
+      }, file?.size ? file : null, editingEquipment?.imagePath, editingEquipment?.image)
+      await refresh()
+      form.reset()
+      setEditingEquipment(null)
+      setNotice('Equipment saved to Supabase.')
+    } catch (saveError) {
+      setError(saveError.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function removeItem(table, item) {
     if (!window.confirm(`Delete “${item.title}” permanently?`)) return
     setBusy(true)
@@ -888,6 +932,7 @@ function AdminDashboard({ user }) {
       await refresh()
       if (editingProject?.id === item.id) setEditingProject(null)
       if (editingCertificate?.id === item.id) setEditingCertificate(null)
+      if (editingEquipment?.id === item.id) setEditingEquipment(null)
       setNotice('Item deleted.')
     } catch (removeError) {
       setError(removeError.message)
@@ -915,6 +960,7 @@ function AdminDashboard({ user }) {
         <div className="admin-tabs" role="tablist" aria-label="Content type">
           <button aria-selected={activeTab === 'projects'} onClick={() => setActiveTab('projects')} role="tab" type="button">Projects ({projectsList.length})</button>
           <button aria-selected={activeTab === 'certificates'} onClick={() => setActiveTab('certificates')} role="tab" type="button">Certificates ({certificatesList.length})</button>
+          <button aria-selected={activeTab === 'equipment'} onClick={() => setActiveTab('equipment')} role="tab" type="button">Equipment ({equipmentList.length})</button>
         </div>
         {activeTab === 'projects' ? (
           <>
@@ -938,7 +984,7 @@ function AdminDashboard({ user }) {
               {!projectsList.length && <p>No projects in Supabase yet. Run the SQL seed section first.</p>}
             </div>
           </>
-        ) : (
+        ) : activeTab === 'certificates' ? (
           <>
             <form className="admin-form" key={editingCertificate?.id || 'new-certificate'} onSubmit={submitCertificate}>
               <h2>{editingCertificate ? 'Edit certificate' : 'Add certificate'}</h2>
@@ -955,6 +1001,24 @@ function AdminDashboard({ user }) {
             <div className="admin-saved-list"><h2>Certificates</h2>
               {certificatesList.map((item) => <div className="admin-saved-item" key={item.id}><span>{item.isPublished ? 'Published' : 'Draft'}</span><strong>{item.title}</strong><button className="text-link" onClick={() => { setEditingCertificate(item); setError(''); window.scrollTo(0, 0) }} type="button">Edit</button><button className="text-link" disabled={busy} onClick={() => removeItem(ADMIN_CERTIFICATES_KEY, item)} type="button">Delete</button></div>)}
               {!certificatesList.length && <p>No certificates yet.</p>}
+            </div>
+          </>
+        ) : (
+          <>
+            <form className="admin-form" key={editingEquipment?.id || 'new-equipment'} onSubmit={submitEquipment}>
+              <h2>{editingEquipment ? 'Edit equipment' : 'Add equipment'}</h2>
+              <label><span>Equipment name</span><input defaultValue={editingEquipment?.title || ''} name="title" placeholder="Graphics card" required /></label>
+              <label><span>Category</span><input defaultValue={editingEquipment?.category || ''} name="category" placeholder="Computer hardware" /></label>
+              <label><span>Description</span><textarea defaultValue={editingEquipment?.summary || ''} name="summary" placeholder="A short description of this item." required rows="3" /></label>
+              <label><span>Purpose</span><input defaultValue={editingEquipment?.purpose || ''} name="purpose" placeholder="Gaming, study, or development" /></label>
+              <label><span>Image {editingEquipment ? '(leave blank to keep current)' : ''}</span><input accept="image/jpeg,image/png,image/webp" name="image" required={!editingEquipment} type="file" /></label>
+              <label><span>Display order</span><input defaultValue={editingEquipment?.displayOrder ?? equipmentList.length + 1} min="0" name="displayOrder" type="number" /></label>
+              <label className="admin-checkbox"><input defaultChecked={editingEquipment?.isPublished ?? true} name="isPublished" type="checkbox" /><span>Published on public portfolio</span></label>
+              <div className="admin-form-actions"><button className="button button--primary" disabled={busy} type="submit">{busy ? 'Saving…' : editingEquipment ? 'Save equipment' : 'Add equipment'}</button>{editingEquipment && <button className="button button--ghost" onClick={() => setEditingEquipment(null)} type="button">Cancel edit</button>}</div>
+            </form>
+            <div className="admin-saved-list"><h2>Equipment</h2>
+              {equipmentList.map((item) => <div className="admin-saved-item" key={item.id}><span>{item.isPublished ? 'Published' : 'Draft'}</span><strong>{item.title}</strong><button className="text-link" onClick={() => { setEditingEquipment(item); setError(''); window.scrollTo(0, 0) }} type="button">Edit</button><button className="text-link" disabled={busy} onClick={() => removeItem(ADMIN_EQUIPMENT_KEY, item)} type="button">Delete</button></div>)}
+              {!equipmentList.length && <p>No equipment records yet. Run the equipment SQL migration first.</p>}
             </div>
           </>
         )}
