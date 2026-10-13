@@ -592,7 +592,6 @@ function Contact() {
   const [copied, setCopied] = useState(false)
   const [sendState, setSendState] = useState('idle')
   const [sendError, setSendError] = useState('')
-  const [fallbackHref, setFallbackHref] = useState('')
 
   async function copyEmail() {
     try {
@@ -610,7 +609,6 @@ function Contact() {
     const fields = new FormData(form)
     setSendState('sending')
     setSendError('')
-    setFallbackHref('')
 
     try {
       const response = await fetch(`https://formsubmit.co/ajax/${socialLinks.email.value}`, {
@@ -623,27 +621,18 @@ function Contact() {
           _replyto: fields.get('email'),
           _subject: `Portfolio message from ${fields.get('name')}`,
           _template: 'table',
+          _url: window.location.href,
         }),
       })
       const result = await response.json().catch(() => ({}))
       if (!response.ok || (result.success !== true && result.success !== 'true')) {
-        throw new Error(result.message || `Email service returned an error (${response.status}).`)
+        throw new Error('Could not send your message.')
       }
 
       form.reset()
       setSendState('sent')
-    } catch (error) {
-      const details = error instanceof Error ? error.message : ''
-      const subject = `Portfolio message from ${fields.get('name')}`
-      const body = `From: ${fields.get('name')}\nReply to: ${fields.get('email')}\n\n${fields.get('message')}`
-      setFallbackHref(`${socialLinks.email.href}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)
-      setSendError(
-        details.includes('Failed to fetch')
-          ? 'Hindi maabot ang email service. Suriin ang internet connection at subukan muli. Kung unang gamit ito, kumpirmahin muna ang activation email ng FormSubmit sa inbox o spam.'
-          : details
-            ? `${details} Kung unang gamit ito, tingnan din ang inbox o spam para sa FormSubmit activation email.`
-            : 'Hindi naipadala. Tingnan ang inbox o spam para sa FormSubmit activation email, pagkatapos ay subukan muli.'
-      )
+    } catch {
+      setSendError('Could not send your message. Please try again.')
       setSendState('error')
     }
   }
@@ -700,12 +689,6 @@ function Contact() {
                     ? 'Sending your message…'
                     : 'Your message will be sent to my inbox. I can reply directly to your email.'}
             </p>
-            {sendState === 'error' && (
-              <a className="contact-form__fallback" href={fallbackHref}>
-                Open your email app with this message
-                <Icon name="arrowUpRight" size={15} />
-              </a>
-            )}
           </form>
         </div>
         <div className="contact-directory">

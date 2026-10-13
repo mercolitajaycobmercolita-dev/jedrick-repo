@@ -684,8 +684,6 @@ h1 span { display: inline; color: var(--accent); }
 .contact-form__note--sending { color: var(--paper); }
 .contact-form__note--sent { border-color: color-mix(in srgb, var(--accent) 45%, transparent); color: var(--accent-pale); background: color-mix(in srgb, var(--accent) 8%, transparent); }
 .contact-form__note--error { border-color: color-mix(in srgb, #ff8f82 48%, transparent); color: #ffb0a7; background: color-mix(in srgb, #ff8f82 7%, transparent); }
-.contact-form__fallback { display: inline-flex; align-items: center; gap: 0.35rem; justify-self: start; color: var(--accent-pale); font-size: 0.76rem; text-underline-offset: 0.2em; }
-.contact-form__fallback:hover { color: var(--accent); }
 
 .contact-directory { border-top: 1px solid var(--line-strong); }
 .directory-heading { display: flex; justify-content: space-between; padding: 0.85rem 0; color: var(--muted); }
