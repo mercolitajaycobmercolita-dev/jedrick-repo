@@ -277,7 +277,7 @@ function About() {
                 <span>June 2026</span>
               </div>
               <p>I Build clients portfolio websites and planning future web projects,
-                including a Pickleball Website and a Barber Shop CMS. 
+                <br /> including a Pickleball Website and a Barber Shop CMS. 
                 <br /> Focused on improving my web development skills, 
                 responsive design, and website functionality.</p>
             </div>
