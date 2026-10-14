@@ -512,8 +512,11 @@ h1 span { display: inline; color: var(--accent); }
 .about-content > p:not(.lead-copy) { max-width: 72ch; margin: 0 auto 1.4rem; color: var(--muted-strong); font-size: 0.93rem; line-height: 1.78; }
 .about-experience { max-width: 850px; margin: 2.5rem auto; padding: 1.2rem 0; border-block: 1px solid var(--line); text-align: left; }
 .about-experience__topline { display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: var(--muted); font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase; }
-.about-experience h2 { margin: 0.8rem 0 0.25rem; color: var(--paper); font-size: 1.25rem; }
-.about-content .about-experience > p { margin: 0; color: var(--muted-strong); font-size: 0.88rem; }
+.about-experience__entry { padding-top: 0.95rem; border-top: 1px solid var(--line); }
+.about-experience > .eyebrow + .about-experience__entry { margin-top: 0.8rem; }
+.about-experience__entry + .about-experience__entry { margin-top: 0.95rem; }
+.about-experience__entry h2 { margin: 0; color: var(--paper); font-family: var(--display); font-size: 1.05rem; letter-spacing: -0.025em; text-transform: none; }
+.about-content .about-experience__entry > p { margin: 0.2rem 0 0; color: var(--muted-strong); font-size: 0.88rem; }
 .about-focus { max-width: 850px; margin: 2.5rem auto; padding-top: 1.5rem; border-top: 1px solid var(--line); }
 .about-focus h2 { margin: 0 0 1rem; font-size: 1.2rem; }
 .about-focus ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin: 0; padding: 0; list-style: none; text-align: left; }

@@ -263,17 +263,25 @@ function About() {
             to becoming the developer I want to be.
           </p>
           <div className="about-experience">
-            <div className="about-experience__topline">
-              <span className="eyebrow">Work experience</span>
-              <span>August 29 – November 25</span>
+            <span className="eyebrow">Work experience</span>
+            <div className="about-experience__entry">
+              <div className="about-experience__topline">
+                <h2>Graphic Designer</h2>
+                <span>August 29 – November 25, 2025</span>
+              </div>
+              <p>Capas JS Printing Shop</p>
             </div>
-            <h2>Graphic Designer</h2>
-            <p>Capas JS Printing Shop</p>
+            <div className="about-experience__entry">
+              <div className="about-experience__topline">
+                <h2>Freelance Web Developer</h2>
+                <span>June 2026</span>
+              </div>
+              <p>Freelance</p>
+            </div>
           </div>
           <div className="about-focus">
             <h2>What I'm working toward</h2>
             <ul>
-              <li><strong>Web Development:</strong> Improving my HTML, CSS, JavaScript, and WordPress skills.</li>
               <li><strong>Full-Stack Development:</strong> Learning how frontend and backend technologies work together.</li>
               <li><strong>Cybersecurity:</strong> Exploring web security and secure development practices.</li>
               <li><strong>Project Building:</strong> Applying my knowledge to practical projects and real-world problems.</li>
