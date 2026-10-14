@@ -18,7 +18,7 @@ export const skillGroups = [
   {
     label: 'Frameworks & Build Tools',
     note: 'Tools used to build this portfolio website.',
-    skills: ['React', 'Vite'],
+    skills: ['React', 'Vite', 'Laravel'],
   },
   {
     label: 'Web Technologies',
@@ -29,6 +29,16 @@ export const skillGroups = [
     label: 'Database',
     note: 'Portfolio content and authentication are powered by Supabase.',
     skills: ['Supabase', 'PostgreSQL'],
+  },
+  {
+    label: 'CMS',
+    note: 'A platform for building and managing website content.',
+    skills: ['WordPress'],
+  },
+  {
+    label: 'Local Development Environment',
+    note: 'A local server stack for developing and testing PHP and MySQL projects.',
+    skills: ['XAMPP'],
   },
   {
     label: 'IDEs',
