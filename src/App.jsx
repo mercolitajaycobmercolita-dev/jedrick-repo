@@ -276,7 +276,6 @@ function About() {
                 <h2>Freelance Web Developer</h2>
                 <span>June 2026</span>
               </div>
-              <p>Freelance</p>
             </div>
           </div>
           <div className="about-focus">
