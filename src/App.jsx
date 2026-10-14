@@ -276,6 +276,10 @@ function About() {
                 <h2>Freelance Web Developer</h2>
                 <span>June 2026</span>
               </div>
+              <p>I Build clients portfolio websites and planning future web projects,
+                including a Pickleball Website and a Barber Shop CMS. 
+                Focused on improving my web development skills, 
+                responsive design, and website functionality.</p>
             </div>
           </div>
           <div className="about-focus">
