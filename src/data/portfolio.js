@@ -12,42 +12,42 @@ export const navigationItems = [
 export const skillGroups = [
   {
     label: 'Programming Languages',
-    note: 'Languages used for programming and web development.',
+    note: 'Languages I use for programming and web development.',
     skills: ['Java', 'JavaScript', 'Python', 'PHP'],
   },
   {
     label: 'Frameworks & Build Tools',
-    note: 'Tools used to build this portfolio website.',
+    note: 'Frameworks and build tools I use to develop websites and applications.',
     skills: ['React', 'Vite', 'Laravel'],
   },
   {
     label: 'Web Technologies',
-    note: 'The core markup and styling used throughout the portfolio.',
+    note: 'Web technologies I use to structure and style websites.',
     skills: ['HTML5', 'CSS3'],
   },
   {
     label: 'Database',
-    note: 'Portfolio content and authentication are powered by Supabase.',
+    note: 'Database tools I use to store and manage project data.',
     skills: ['Supabase', 'PostgreSQL'],
   },
   {
     label: 'CMS',
-    note: 'A platform for building and managing website content.',
+    note: 'The platform I use to create and manage website content.',
     skills: ['WordPress'],
   },
   {
     label: 'IDEs',
-    note: 'Editors and environments used to write and manage code.',
+    note: 'Editors and IDEs I use to write and organize code.',
     skills: ['Visual Studio Code', 'Visual Studio', 'Eclipse IDE'],
   },
   {
     label: 'Development Tools',
-    note: 'Tools for local development, version control, and deployment.',
+    note: 'Tools I use to run, track, and deploy my projects.',
     skills: ['XAMPP', 'Git', 'GitHub', 'Vercel'],
   },
   {
     label: 'Design Tools',
-    note: 'Tools for design, image editing, and video editing.',
+    note: 'Creative tools I use for design, image editing, and video editing.',
     skills: ['Canva', 'Figma', 'Adobe Photoshop', 'CapCut'],
   },
 ]

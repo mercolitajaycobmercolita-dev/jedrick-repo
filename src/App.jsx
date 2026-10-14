@@ -262,6 +262,14 @@ function About() {
             mistakes. I'm still building my foundation, but every project brings me one step closer
             to becoming the developer I want to be.
           </p>
+          <div className="about-experience">
+            <div className="about-experience__topline">
+              <span className="eyebrow">Work experience</span>
+              <span>August 29 – November 25</span>
+            </div>
+            <h2>Graphic Designer</h2>
+            <p>Capas JS Printing Shop</p>
+          </div>
           <div className="about-focus">
             <h2>What I'm working toward</h2>
             <ul>
