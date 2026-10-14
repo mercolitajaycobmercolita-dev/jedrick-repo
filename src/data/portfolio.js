@@ -36,19 +36,14 @@ export const skillGroups = [
     skills: ['WordPress'],
   },
   {
-    label: 'Local Development Environment',
-    note: 'A local server stack for developing and testing PHP and MySQL projects.',
-    skills: ['XAMPP'],
-  },
-  {
     label: 'IDEs',
     note: 'Editors and environments used to write and manage code.',
     skills: ['Visual Studio Code', 'Visual Studio', 'Eclipse IDE'],
   },
   {
     label: 'Development Tools',
-    note: 'Tools used for version control and deploying the portfolio.',
-    skills: ['Git', 'GitHub', 'Vercel'],
+    note: 'Tools for local development, version control, and deployment.',
+    skills: ['XAMPP', 'Git', 'GitHub', 'Vercel'],
   },
   {
     label: 'Design Tools',
